@@ -2,7 +2,7 @@
 // on chain goods
 
 contract Asset {
-    function owner(string recordId) returns (address ownerAddress);
+    function owner(string _recordId) returns (address ownerAddress);
 
-    function setOwner(string recordId, address newOwner);    
+    function setOwner(string _recordId, address _newOwner);    
 }
