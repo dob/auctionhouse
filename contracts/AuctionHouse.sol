@@ -78,18 +78,48 @@ contract AuctionHouse {
 	    if (!sellerOwnsAsset(msg.sender, _contractAddressOfAsset, _recordIdOfAsset)) {
 		throw;
 	    }
-	    
-	    Auction memory a;
+
+	    // Check to see if the auction deadline is in the future
+	    if (block.number >= _deadline) {
+		throw;
+	    }
+
+	    // Price validations
+	    if (_startingPrice < 0 || _reservePrice < 0) {
+		throw;
+	    }
+
+	    // Distribution validations
+	    if (_distributionCut < 0 || _distributionCut > 100) {
+		throw;
+	    }
+
+	    auctionId = auctions.length++;
+	    Auction a = auctions[auctionId];
 	    a.seller = msg.sender;
 	    a.contractAddress = _contractAddressOfAsset;
 	    a.recordId = _recordIdOfAsset;
+	    a.title = _title;
+	    a.description = _description;
+	    a.blockNumberOfDeadline = _deadline;
+	    a.status = AuctionStatus.Pending;
+	    a.distributionCut = _distributionCut;
+	    a.distributionAddress = _distributionCutAddress;
+	    a.startingPrice = _startingPrice;
+	    a.reservePrice = _reservePrice;
+	    a.currentBid = 0;
 
-	    
+	    return auctionId;
 	}
 
     function sellerOwnsAsset(address _seller, address _contract, string _recordId) returns (bool success) {
 	Asset assetContract = Asset(_contract);
 	return assetContract.owner(_recordId) == _seller;
+    }
+
+    function getAuction(uint idx) returns (string, string, uint256) {
+	Auction a = auctions[idx];
+	return (a.title, a.description, a.currentBid);
     }
     
     
