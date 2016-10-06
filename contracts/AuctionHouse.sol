@@ -57,8 +57,21 @@ contract AuctionHouse {
     }
 
     modifier onlySeller(uint auctionId) {
-    if (auctions[auctionId].seller != msg.sender) throw;
-    _
+	if (auctions[auctionId].seller != msg.sender) throw;
+	_
+    }
+
+    modifier onlyLive(uint auctionId) {
+	Auction a = auctions[auctionId];
+	if (a.status != AuctionStatus.Active) {
+	    throw;
+	}
+
+	// Auction should be over
+	if (block.number >= a.blockNumberOfDeadline) {
+	    throw;
+	}
+	_
     }
     
     /* PLACEHOLDERS FOR IMPLEMENTATION */
@@ -114,7 +127,7 @@ contract AuctionHouse {
 	    a.reservePrice = _reservePrice;
 	    a.currentBid = 0;
 
-        auctionsRunByUser[a.seller].push(auctionId);
+            auctionsRunByUser[a.seller].push(auctionId);
 
 	    return auctionId;
 	}
@@ -158,8 +171,8 @@ contract AuctionHouse {
     }
 
     function getStatus(uint idx) returns (uint) {
-    Auction a = auctions[idx];
-    return uint(a.status);
+	Auction a = auctions[idx];
+	return uint(a.status);
     }
 
     function getAuctionsCountForUser(address addr) returns (uint) {
@@ -178,6 +191,38 @@ contract AuctionHouse {
 
         a.status = AuctionStatus.Active;
         return true;
+    }
+
+    /* BIDS */
+    function getBidCountForAuction(uint auctionId) returns (uint) {
+	Auction a = auctions[auctionId];
+	return a.bids.length;
+    }
+
+    function getBidForAuctionByIdx(uint auctionId, uint idx) returns (address bidder, uint256 amount, uint timestamp) {
+	Auction a = auctions[auctionId];
+	if(idx > a.bids.length - 1) {
+	    throw;
+	}
+	
+	Bid b = a.bids[idx];
+	return (b.bidder, b.amount, b.timestamp);
+    }
+
+    function placeBid(uint auctionId, uint256 amount) onlyLive(auctionId) returns (bool success) {
+	Auction a = auctions[auctionId];
+	if (a.currentBid >= amount) {
+	    return false;
+	}
+
+	uint bidIdx = a.bids.length++;
+	Bid b = a.bids[bidIdx];
+	b.bidder = msg.sender;
+	b.amount = amount;
+	b.timestamp = now;
+	a.currentBid = amount;
+
+	auctionsBidOnByUser[b.bidder].push(auctionId);
     }
     
     /*

@@ -90,6 +90,57 @@ contract("AuctionHouse", function(accounts) {
 		});
 	});
 
+    it("should place a valid bid", function() {
+	var sn = SampleName.deployed();
+	var ah = AuctionHouse.deployed();
+	var owner = accounts[4];
+	var recordId = "test4.name";
+	var bidder = accounts[5];
+	var bidAmount = (4 * 10^6);
+	var auctionId;
+
+	// Create an asset,
+	// create an auction,
+	// transfer the asset to the auction
+	// activate the auction
+	// place a bid
+	// check that the bid properties and auction current bid updated
+
+	sn.addRecord(recordId, owner, recordId, owner, {from:owner}).then(function(txId) {
+	    ah.createAuction("Title",
+			     "Description",
+			     sn.address,
+			     recordId,
+			     web3.eth.blockNumber + 100,
+			     (2 * 10^6),
+			     (3 * 10^6),
+			     5,
+			     accounts[2], {from:owner}).then(function(txId) {
+			    	 return ah.getAuctionsCountForUser.call(owner);
+			     }).then(function(auctionsCount) {
+			    	 return ah.getAuctionIdForUserAndIdx.call(owner, auctionsCount - 1);
+			     }).then(function(aucId) {
+			    	 auctionId = aucId;
+			    	 return sn.setOwner(recordId, ah.address, {from:owner});
+			     }).then(function() {
+			    	 return ah.activateAuction(auctionId, {from:owner});
+			     }).then(function(res) {
+				 return ah.placeBid(auctionId, bidAmount, {from:bidder});
+			     }).then(function() {
+			    	 return ah.getBidCountForAuction.call(auctionId);
+			     }).then(function(bidCount){
+				 assert.strictEqual(bidCount.toNumber(), 1, "there should be one bid");
+				 return ah.getBidForAuctionByIdx.call(auctionId, bidCount - 1);
+			     }).then(function(bids) {
+				 assert.strictEqual(bids[0], bidder, "bidder was not correct");
+				 assert.strictEqual(bids[1].toNumber(), bidAmount, "bid amount was not correct");
+				 return ah.getAuction.call(auctionId);
+			     }).then(function(auction) {
+				 assert.strictEqual(auction[10].toNumber(), bidAmount, "current bid was not equal to the newly bid amount");
+			     });
+	});
+    });
+
  //    it("should fail when creating an invalid auction", function(done) {
 	// var sn = SampleName.deployed();
 	// var ah = AuctionHouse.deployed();
