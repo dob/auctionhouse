@@ -117,9 +117,36 @@ contract AuctionHouse {
 	return assetContract.owner(_recordId) == _seller;
     }
 
-    function getAuction(uint idx) returns (string, string, uint256) {
+    /**
+     * The auction fields are indexed in the return val as follows
+     * [0]  -> Auction.seller
+     * [1]  -> Auction.contractAddress
+     * [2]  -> Auction.recordId
+     * [3]  -> Auction.title
+     * [4]  -> Auction.description
+     * [5]  -> Auction.blockNumberOfDeadline
+     * []  -> Auction.status (Not included right now)
+     * [6]  -> Auction.distributionCut
+     * [7]  -> Auction.distributionAddress
+     * [8]  -> Auction.startingPrice
+     * [9] -> Auction.reservePrice
+     * [10] -> Auction.currentBid
+     * [11] -> Auction.bids.length      
+     */
+    function getAuction(uint idx) returns (address, address, string, string, string, uint, uint, address, uint256, uint256, uint256, uint) {
 	Auction a = auctions[idx];
-	return (a.title, a.description, a.currentBid);
+	return (a.seller,
+		a.contractAddress,
+		a.recordId,
+		a.title,
+		a.description,
+		a.blockNumberOfDeadline,
+		a.distributionCut,
+		a.distributionAddress,
+		a.startingPrice,
+		a.reservePrice,
+		a.currentBid,
+		a.bids.length);
     }
     
     

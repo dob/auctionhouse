@@ -37,8 +37,8 @@ contract("AuctionHouse", function(accounts) {
 				    5,
 				    accounts[2]).then(function(txId) {
 					return ah.getAuction.call(0).then(function(auction) {
-					    assert.strictEqual(auction[0], "Title", "Didn't get an updated auction");
-					    assert.strictEqual(auction[2].toNumber(), 0, "Didn't get an updated auction bid price");
+					    assert.strictEqual(auction[3], "Title", "Didn't get an updated auction");
+					    assert.strictEqual(auction[10].toNumber(), 0, "Didn't get an updated auction bid price");
 					});
 				    });
 	});
