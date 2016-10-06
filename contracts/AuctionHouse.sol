@@ -41,6 +41,7 @@ contract AuctionHouse {
 
     Auction[] public auctions;          // All auctions
     mapping(address => uint[]) public auctionsRunByUser; // Pointer to auctions index for auctions run by this user
+
     mapping(address => uint[]) public auctionsBidOnByUser; // Pointer to auctions index for auctions this user has bid on
 
     address owner;
@@ -55,6 +56,10 @@ contract AuctionHouse {
 	_
     }
 
+    modifier onlySeller(uint auctionId) {
+    if (auctions[auctionId].seller != msg.sender) throw;
+    _
+    }
     
     /* PLACEHOLDERS FOR IMPLEMENTATION */
 
@@ -109,6 +114,8 @@ contract AuctionHouse {
 	    a.reservePrice = _reservePrice;
 	    a.currentBid = 0;
 
+        auctionsRunByUser[a.seller].push(auctionId);
+
 	    return auctionId;
 	}
 
@@ -125,13 +132,13 @@ contract AuctionHouse {
      * [3]  -> Auction.title
      * [4]  -> Auction.description
      * [5]  -> Auction.blockNumberOfDeadline
-     * []  -> Auction.status (Not included right now)
      * [6]  -> Auction.distributionCut
      * [7]  -> Auction.distributionAddress
      * [8]  -> Auction.startingPrice
      * [9] -> Auction.reservePrice
      * [10] -> Auction.currentBid
      * [11] -> Auction.bids.length      
+     * []  -> Auction.status (Not included right now)
      */
     function getAuction(uint idx) returns (address, address, string, string, string, uint, uint, address, uint256, uint256, uint256, uint) {
 	Auction a = auctions[idx];
@@ -146,12 +153,34 @@ contract AuctionHouse {
 		a.startingPrice,
 		a.reservePrice,
 		a.currentBid,
-		a.bids.length);
+		a.bids.length
+        );
+    }
+
+    function getStatus(uint idx) returns (uint) {
+    Auction a = auctions[idx];
+    return uint(a.status);
+    }
+
+    function getAuctionsCountForUser(address addr) returns (uint) {
+        return auctionsRunByUser[addr].length;
+    }
+
+    function getAuctionIdForUserAndIdx(address addr, uint idx) returns (uint) {
+        return auctionsRunByUser[addr][idx];
+    }
+
+    // Checks if this contract address is the owner of the item for the auction
+    function activateAuction(uint auctionId) onlySeller(auctionId) returns (bool){
+        Auction a = auctions[auctionId];
+
+        if (!sellerOwnsAsset(this, a.contractAddress, a.recordId)) throw;
+
+        a.status = AuctionStatus.Active;
+        return true;
     }
     
-    
-/*    function activateAuction();   // Checks if this contract address is the owner of the item for the auction
-    
+    /*
     function cancelAuction();     // Cancel an auction before it's too late
     function endAuction();        // Anyone can call this to see if the auction is done and transfer the items
 

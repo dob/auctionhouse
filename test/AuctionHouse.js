@@ -23,6 +23,7 @@ contract("AuctionHouse", function(accounts) {
 	var ah = AuctionHouse.deployed();
 	var owner = accounts[0];
 	var recordId = "test2.name";
+	var targetAuctionId = 0;
 
 	// Start by creating a sample record
 	sn.addRecord(recordId, owner, recordId, owner, {from:owner}).then(function(txId) {
@@ -35,12 +36,83 @@ contract("AuctionHouse", function(accounts) {
 				    (2 * 10^6),
 				    (3 * 10^6),
 				    5,
-				    accounts[2]).then(function(txId) {
-					return ah.getAuction.call(0).then(function(auction) {
+				    accounts[2], {from:owner}).then(function(txId) {
+
+					return ah.getAuction.call(targetAuctionId).then(function(auction) {
+					    assert.strictEqual(auction[0], owner, "Didn't get the correct seller");
 					    assert.strictEqual(auction[3], "Title", "Didn't get an updated auction");
 					    assert.strictEqual(auction[10].toNumber(), 0, "Didn't get an updated auction bid price");
+					    return ah.getAuctionsCountForUser.call(owner);
+					}).then(function(auctionsCount) {
+					 	assert.strictEqual(auctionsCount.toNumber(), 1, "Should only have 1 auction");
+					 	return ah.getAuctionIdForUserAndIdx.call(owner, auctionsCount.toNumber() - 1);
+					}).then(function(auctionId) {
+					 	assert.strictEqual(auctionId.toNumber(), targetAuctionId, "AuctionId should be zero");
 					});
+
 				    });
 	});
     });
+
+	it("should activate an auction", function() {
+		var sn = SampleName.deployed();
+		var ah = AuctionHouse.deployed();
+		var owner = accounts[1];
+		var recordId = "test3.name";
+		var auctionId;
+
+		sn.addRecord(recordId, owner, recordId, owner, {from:owner}).then(function(txId) {
+			ah.createAuction("Title",
+				"Description",
+				sn.address,
+				recordId,
+			    web3.eth.blockNumber + 100,
+			    (2 * 10^6),
+			    (3 * 10^6),
+			    5,
+			    accounts[2], {from:owner}).then(function(txId) {
+			    	return ah.getAuctionsCountForUser.call(owner);
+			    }).then(function(auctionsCount) {
+			    	return ah.getAuctionIdForUserAndIdx.call(owner, auctionsCount - 1);
+			    }).then(function(aucId) {
+			    	auctionId = aucId;
+			    	return ah.getStatus.call(auctionId);
+			    }).then(function(auctionStatus) {
+			    	assert.strictEqual(auctionStatus.toNumber(), 0, "Auction status should be inactive");
+			    	return sn.setOwner(recordId, ah.address, {from:owner});
+			    }).then(function() {
+			    	return ah.activateAuction(auctionId, {from:owner});
+			    }).then(function(res) {
+			    	return ah.getStatus.call(auctionId);
+			    }).then(function(newAuctionStatus) {
+			    	assert.strictEqual(newAuctionStatus.toNumber(), 1, "Auction should be active");
+			    });
+		});
+	});
+
+ //    it("should fail when creating an invalid auction", function(done) {
+	// var sn = SampleName.deployed();
+	// var ah = AuctionHouse.deployed();
+	// var owner = accounts[0];
+	// var recordId = "test3.name";
+
+	// // Start by creating a sample record
+	// sn.addRecord(recordId, owner, recordId, owner, {from:owner}).then(function(txId) {
+	//     // Now create an auction
+	//     return ah.createAuction("Title",
+	// 			    "Description",
+	// 			    sn.address,
+	// 			    recordId,
+	// 			    web3.eth.blockNumber - 1,
+	// 			    (2 * 10^6),
+	// 			    (3 * 10^6),
+	// 			    5,
+	// 			    accounts[2]).then(function(txId) {
+
+	// 				return ah.getAuction.call(0).then(function(auction) {
+	// 				    assert.strictEqual(true, false, "Shouldn't get here");
+	// 				});
+	// 			    });
+	// }).catch(done);
+ //    });
 });
