@@ -7,11 +7,11 @@ contract("AuctionHouse", function(accounts) {
 
 	// Create a samplename record
 	sn.addRecord(recordId, owner, recordId, owner, {from:owner}).then(function(res) {
-	    return ah.sellerOwnsAsset.call(owner, sn.address, recordId).then(function(res) {
+	    return ah.partyOwnsAsset.call(owner, sn.address, recordId).then(function(res) {
 		assert.strictEqual(res, true, "the owner doesn't own this asset");
 	    });
 	}).then(function(res) {
-	    return ah.sellerOwnsAsset.call(accounts[1], sn.address, recordId).then(function(res) {
+	    return ah.partyOwnsAsset.call(accounts[1], sn.address, recordId).then(function(res) {
 		assert.strictEqual(res, false, "the owner owns this asset, but shouldn't.");
 	    });
 	});
@@ -54,7 +54,7 @@ contract("AuctionHouse", function(accounts) {
 	});
     });
 
-	it("should activate an auction", function() {
+	it("should activate and cancel an auction", function() {
 		var sn = SampleName.deployed();
 		var ah = AuctionHouse.deployed();
 		var owner = accounts[1];
@@ -78,14 +78,22 @@ contract("AuctionHouse", function(accounts) {
 			    	auctionId = aucId;
 			    	return ah.getStatus.call(auctionId);
 			    }).then(function(auctionStatus) {
-			    	assert.strictEqual(auctionStatus.toNumber(), 0, "Auction status should be inactive");
+			    	assert.strictEqual(auctionStatus.toNumber(), 0, "Auction status should be pending");
 			    	return sn.setOwner(recordId, ah.address, {from:owner});
 			    }).then(function() {
 			    	return ah.activateAuction(auctionId, {from:owner});
 			    }).then(function(res) {
 			    	return ah.getStatus.call(auctionId);
-			    }).then(function(newAuctionStatus) {
-			    	assert.strictEqual(newAuctionStatus.toNumber(), 1, "Auction should be active");
+			    }).then(function(activeAuctionStatus) {
+			    	assert.strictEqual(activeAuctionStatus.toNumber(), 1, "Auction should be active");
+			    	return ah.cancelAuction(auctionId, {from:owner});
+			    }).then(function(res) {
+			    	return ah.getStatus.call(auctionId);
+			    }).then(function(cancelledAuctionStatus) {
+			    	assert.strictEqual(cancelledAuctionStatus.toNumber(), 2, "Auction should be inactive");
+			    	return sn.owner.call(recordId);
+			    }).then(function(assetOwner) {
+			    	assert.strictEqual(assetOwner, owner, "Should return the asset to the seller");
 			    });
 		});
 	});
@@ -140,6 +148,44 @@ contract("AuctionHouse", function(accounts) {
 			     });
 	});
     });
+
+    it("should cancel an auction", function() {
+		var sn = SampleName.deployed();
+		var ah = AuctionHouse.deployed();
+		var owner = accounts[6];
+		var recordId = "test5.name";
+		var bidder = accounts[7];
+		var bidAmount = (4 * 10^6);
+		var auctionId;
+
+		// Create an asset,
+		// create an auction,
+		// transfer the asset to the auction
+		// activate the auction
+		// place a bid
+		// check that the bid properties and auction current bid updated
+
+		sn.addRecord(recordId, owner, recordId, owner, {from:owner}).then(function(txId) {
+		    ah.createAuction("Title",
+				    "Description",
+				    sn.address,
+				    recordId,
+				    web3.eth.blockNumber + 100,
+				    (2 * 10^6),
+				    (3 * 10^6),
+				    5,
+				    accounts[2], {from:owner}).then(function(txId) {
+				    	return ah.getAuctionsCountForUser.call(owner);
+				    }).then(function(auctionsCount) {
+				    	return ah.getAuctionIdForUserAndIdx.call(owner, auctionsCount - 1);
+				    }).then(function(aucId) {
+			    		auctionId = aucId;
+				     	return ah.getStatus.call(auctionId);
+				    }).then(function(status) {
+				    	assert.strictEqual(status.toNumber(), 0, "Should be active");
+				    });
+		});
+	});
 
  //    it("should fail when creating an invalid auction", function(done) {
 	// var sn = SampleName.deployed();

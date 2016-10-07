@@ -67,7 +67,7 @@ contract AuctionHouse {
 	    throw;
 	}
 
-	// Auction should be over
+	// Auction should not be over
 	if (block.number >= a.blockNumberOfDeadline) {
 	    throw;
 	}
@@ -93,7 +93,7 @@ contract AuctionHouse {
 	address _distributionCutAddress) returns (uint auctionId) {
 
 	    // Check to see if the seller owns the asset at the contract
-	    if (!sellerOwnsAsset(msg.sender, _contractAddressOfAsset, _recordIdOfAsset)) {
+	    if (!partyOwnsAsset(msg.sender, _contractAddressOfAsset, _recordIdOfAsset)) {
 		throw;
 	    }
 
@@ -132,9 +132,9 @@ contract AuctionHouse {
 	    return auctionId;
 	}
 
-    function sellerOwnsAsset(address _seller, address _contract, string _recordId) returns (bool success) {
+    function partyOwnsAsset(address _party, address _contract, string _recordId) returns (bool success) {
 	Asset assetContract = Asset(_contract);
-	return assetContract.owner(_recordId) == _seller;
+	return assetContract.owner(_recordId) == _party;
     }
 
     /**
@@ -187,10 +187,21 @@ contract AuctionHouse {
     function activateAuction(uint auctionId) onlySeller(auctionId) returns (bool){
         Auction a = auctions[auctionId];
 
-        if (!sellerOwnsAsset(this, a.contractAddress, a.recordId)) throw;
+        if (!partyOwnsAsset(this, a.contractAddress, a.recordId)) throw;
 
         a.status = AuctionStatus.Active;
         return true;
+    }
+
+    function cancelAuction(uint auctionId) onlySeller(auctionId) returns (bool) {
+        Auction a = auctions[auctionId];
+
+        if (!partyOwnsAsset(this, a.contractAddress, a.recordId)) throw;
+
+        Asset asset = Asset(a.contractAddress);
+        asset.setOwner(a.recordId, a.seller);
+
+        a.status = AuctionStatus.Inactive;
     }
 
     /* BIDS */
