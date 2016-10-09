@@ -79,6 +79,13 @@ contract AuctionHouse {
     function AuctionHouse() {
 	owner = msg.sender;
     }
+
+    // This is a convenience function for development, testing debugging
+    // and catching throws in the tests. Can remove after getting the
+    // pattern down.
+    function throwTest() {
+	throw;
+    }
     
     // Create an auction, transfer the item to this contract, activate the auction
     function createAuction(

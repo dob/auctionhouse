@@ -141,29 +141,80 @@ contract("AuctionHouse", function(accounts) {
 	});
     });
 
- //    it("should fail when creating an invalid auction", function(done) {
-	// var sn = SampleName.deployed();
-	// var ah = AuctionHouse.deployed();
-	// var owner = accounts[0];
-	// var recordId = "test3.name";
 
-	// // Start by creating a sample record
-	// sn.addRecord(recordId, owner, recordId, owner, {from:owner}).then(function(txId) {
-	//     // Now create an auction
-	//     return ah.createAuction("Title",
-	// 			    "Description",
-	// 			    sn.address,
-	// 			    recordId,
-	// 			    web3.eth.blockNumber - 1,
-	// 			    (2 * 10^6),
-	// 			    (3 * 10^6),
-	// 			    5,
-	// 			    accounts[2]).then(function(txId) {
+    // Here's an example of catching a throw and validating that the throw occurred.
+    // It seems to work independently, but screws up the test suite if I'm running the suite
+    // and other tests execute after this one?
+    // it("should fail if throwtest doesn't throw", function() {
+    // 	var ah = AuctionHouse.deployed();
+    // 	var reachedStatementDespiteThrow = false;
+    // 	return expectedExceptionPromise(function() {
+    // 	    return ah.throwTest().then(function() {
+    // 		reachedStatementDespiteThrow = true;
+    // 	    });
+    // 	}, 300000000).then(function() {
+    // 	    assert.strictEqual(reachedStatementDespiteThrow, false, "shouldn't be here because the above function should throw");
+    // 	});
+    // });
 
-	// 				return ah.getAuction.call(0).then(function(auction) {
-	// 				    assert.strictEqual(true, false, "Shouldn't get here");
-	// 				});
-	// 			    });
-	// }).catch(done);
- //    });
+    // // This is an attempt at trying to catch a throw on a bad auction creation, but it's not working
+    // it("should fail on creation of a bad auction", function() {
+    // 	var reachedStatementDespiteThrow = false;
+    // 	return expectedExceptionPromise(function() {
+    // 	    return createBadAuction().then(function() {
+    // 		reachedStatementDespiteThrow = true;
+    // 	    });
+    // 	}, 300000000).then(function() {
+    // 	    assert.strictEqual(reachedStatementDespiteThrow, false, "shouldn't be here because the above function should throw");
+    // 	});
+    // });
+
+    // function createBadAuction() {
+    // 	var sn = SampleName.deployed();
+    // 	var ah = AuctionHouse.deployed();
+    // 	var owner = accounts[7];
+    // 	var recordId = "test7.name";
+
+    // 	// Start by creating a sample record
+    // 	sn.addRecord(recordId, owner, recordId, owner, {from:owner}).then(function(txId) {
+    // 	    // Now create an auction
+    // 	    return ah.createAuction("Title",
+    // 				    "Description",
+    // 				    sn.address,
+    // 				    recordId,
+    // 				    web3.eth.blockNumber - 11,
+    // 				    (2 * 10^6),
+    // 				    (3 * 10^6),
+    // 				    5,
+    // 				    accounts[2], {from:owner});
+    // 	});
+    // }
+
+    var expectedExceptionPromise = function (action, gasToUse) {
+	return new Promise(function (resolve, reject) {
+	    try {
+		resolve(action());
+	    } catch(e) {
+		reject(e);
+	    }
+	})
+	    .then(function (txn) {
+		// https://gist.github.com/xavierlepretre/88682e871f4ad07be4534ae560692ee6
+		return web3.eth.getTransactionReceiptMined(txn);
+	    })
+	    .then(function (receipt) {
+		// We are in Geth
+		assert.equal(receipt.gasUsed, gasToUse, "should have used all the gas");
+	    })
+	    .catch(function (e) {
+		if ((e + "").indexOf("invalid JUMP") || (e + "").indexOf("out of gas") > -1) {
+		    // We are in TestRPC
+		} else if ((e + "").indexOf("please check your gas amount") > -1) {
+		    // We are in Geth for a deployment
+		} else {
+		    console.log("About to throw");
+		    throw e;
+		}
+	    });
+    };
 });
