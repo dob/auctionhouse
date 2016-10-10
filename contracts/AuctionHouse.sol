@@ -51,6 +51,8 @@ contract AuctionHouse {
     event BidPlaced(uint auctionId, address bidder, uint256 amount);
     event AuctionEnded(uint auctionId, address winningBidder, uint256 amount);
 
+    event LogFailure(string message);
+
     modifier onlyOwner {
 	if (owner != msg.sender) throw;
 	_
@@ -227,9 +229,15 @@ contract AuctionHouse {
 	return (b.bidder, b.amount, b.timestamp);
     }
 
-    function placeBid(uint auctionId, uint256 amount) onlyLive(auctionId) returns (bool success) {
+    function placeBid(uint auctionId) onlyLive(auctionId) returns (bool success) {
+	uint256 amount = msg.value;
+
 	Auction a = auctions[auctionId];
 	if (a.currentBid >= amount) {
+	    // Want to return the bid amount and return false
+	    if(!msg.sender.send(amount)) {
+		LogFailure("Could not return the invalid bid amount to the bidder");
+	    }
 	    return false;
 	}
 
@@ -241,6 +249,14 @@ contract AuctionHouse {
 	a.currentBid = amount;
 
 	auctionsBidOnByUser[b.bidder].push(auctionId);
+
+	// Return ETH to previous bidder
+	if (bidIdx > 0) {
+	    Bid previousBid = a.bids[bidIdx - 1];
+	    if (!previousBid.bidder.send(previousBid.amount)) {
+		LogFailure("Could not return the outbid amount to the previous bidder");
+	    }
+	}
     }
     
     /*
