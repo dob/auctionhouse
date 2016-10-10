@@ -101,3 +101,16 @@ Of course there are all sorts of frontend enhancements that can be built includi
 If a contract is an owner of an asset, then can a contract call an onlyOwner function, or would the sender of a message be the person who initiated that transaction within the contract?
 
 tx.origin is the user who initiated the call, and msg.sender is the last person in the chain who made the call, so it would be the contract. In the case of starting an auction, the user would have to grant permission to the contract to transfer ownership of the asset.
+
+
+
+
+###Local Test Procedure
+1. Create local chain: `geth --identity "ericnode" --rpc --rpcport "8081" --rpccorsdomain "*" --datadir ./chaindata --port "30303" --nodiscover --rpcapi "db,eth,net,web3" --networkid 1999 init ./CustomGenesis.json` (CustomGenesis.json - http://ethdocs.org/en/latest/network/test-networks.html)
+2. Launch console: `geth --identity "ericnode" --rpc --rpcport "8081" --rpccorsdomain "*" --datadir ./chaindata --port "30303" --nodiscover --rpcapi "db,eth,net,web3" --networkid 1999 console`
+3. Create new account: `personal.newAccount("password")`
+4. Mine some ether: miner.setEtherbase(personal.listAccounts[0]); miner.start()
+5. Make sure miner is running when deploying to testnet
+6. Deploy contracts by running: truffle migrate
+
+personal.unlockAccount(eth.accounts[0], "password")
