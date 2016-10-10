@@ -106,11 +106,13 @@ tx.origin is the user who initiated the call, and msg.sender is the last person 
 
 
 ###Local Test Procedure
-1. Create local chain: `geth --identity "ericnode" --rpc --rpcport "8081" --rpccorsdomain "*" --datadir ./chaindata --port "30303" --nodiscover --rpcapi "db,eth,net,web3" --networkid 1999 init ./CustomGenesis.json` (CustomGenesis.json - http://ethdocs.org/en/latest/network/test-networks.html)
+1. Create local chain: `geth --identity "ericnode" --rpc --rpcport "8081" --rpccorsdomain "*" --datadir ./chaindata --port "30303" --nodiscover --rpcapi "db,eth,net,web3" --networkid 1999 init ./CustomGenesis.json` (create chaindata dir, then create CustomGenesis.json - http://ethdocs.org/en/latest/network/test-networks.html)
 2. Launch console: `geth --identity "ericnode" --rpc --rpcport "8081" --rpccorsdomain "*" --datadir ./chaindata --port "30303" --nodiscover --rpcapi "db,eth,net,web3" --networkid 1999 console`
 3. Create new account: `personal.newAccount("password")`
 4. Mine some ether: miner.setEtherbase(personal.listAccounts[0]); miner.start()
 5. Make sure miner is running when deploying to testnet
 6. Deploy contracts by running: truffle migrate
+7. Unlock account0: `personal.unlockAccount(eth.accounts[0], "password")`
+8. Run simple test: `truffle test test/Simple.js`
 
-personal.unlockAccount(eth.accounts[0], "password")
+
