@@ -229,8 +229,8 @@ contract AuctionHouse {
 
     function placeBid(uint auctionId) onlyLive(auctionId) returns (bool success) {
 	uint256 amount = msg.value;
-
 	Auction a = auctions[auctionId];
+
 	if (a.currentBid >= amount) {
 	    // Want to return the bid amount and return false
 	    if(!msg.sender.send(amount)) {
@@ -255,5 +255,46 @@ contract AuctionHouse {
 		LogFailure("Could not return the outbid amount to the previous bidder");
 	    }
 	}
+    }
+
+    function endAuction(uint auctionId) returns (bool success) {
+	// Check if the auction is passed the end date
+	Auction a = auctions[auctionId];
+	if (block.number < a.blockNumberOfDeadline) {
+	    LogFailure("Can not end an auction that hasn't hit the deadline yet");
+	    return false;
+	}
+
+	// No bids, make the auction inactive
+	if (a.bids.length == 0) {
+	    a.status = AuctionStatus.Inactive;
+	    return true;
+	}
+
+	// If the auction hit its reserve price
+	Bid topBid = a.bids[a.bids.length - 1];
+	Asset asset = Asset(a.contractAddress);
+	
+	if (a.currentBid >= a.reservePrice) {
+	    uint distributionShare = a.currentBid * a.distributionCut / 100;  // Calculate the distribution cut
+	    uint sellerShare = a.currentBid - distributionShare;
+
+	    asset.setOwner(a.recordId, topBid.bidder);  // Set the items new owner
+	    
+	    if (!a.distributionAddress.send(distributionShare)) { LogFailure("Couldn't send the marketing distribution"); }
+	    if (!a.seller.send(sellerShare)) { LogFailure("Couldn't send the seller his cut"); }
+	} else {
+	    // Return the item to the owner and the money to the top bidder
+	    asset.setOwner(a.recordId, a.seller);
+	    if (!topBid.bidder.send(a.currentBid)) { LogFailure("Couldn't send the top bidder his money back on a failed to meet reserve scenario."); }
+	}
+
+	a.status = AuctionStatus.Inactive;
+	return true;
+    }
+
+    function() {
+	// Don't allow ether to be sent blindly to this contract
+	throw;
     }
 }
