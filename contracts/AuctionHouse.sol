@@ -76,8 +76,6 @@ contract AuctionHouse {
 	_
     }
     
-    /* PLACEHOLDERS FOR IMPLEMENTATION */
-
     function AuctionHouse() {
 	owner = msg.sender;
     }
@@ -258,10 +256,4 @@ contract AuctionHouse {
 	    }
 	}
     }
-    
-    /*
-    function cancelAuction();     // Cancel an auction before it's too late
-    function endAuction();        // Anyone can call this to see if the auction is done and transfer the items
-
-    function placeBid();*/
 }
