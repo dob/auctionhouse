@@ -48,8 +48,11 @@ contract AuctionHouse {
 
     // Events
     event AuctionCreated(uint id, string title, uint256 startingPrice, uint256 reservePrice);
+    event AuctionActivated(uint id);
+    event AuctionCancelled(uint id);
     event BidPlaced(uint auctionId, address bidder, uint256 amount);
-    event AuctionEnded(uint auctionId, address winningBidder, uint256 amount);
+    event AuctionEndedWithWinner(uint auctionId, address winningBidder, uint256 amount);
+    event AuctionEndedWithoutWinner(uint auctionId, uint256 topBid, uint256 reservePrice);
 
     event LogFailure(string message);
 
@@ -135,6 +138,7 @@ contract AuctionHouse {
 	    a.currentBid = 0;
 
             auctionsRunByUser[a.seller].push(auctionId);
+	    AuctionCreated(auctionId, a.title, a.startingPrice, a.reservePrice);
 
 	    return auctionId;
 	}
@@ -197,6 +201,7 @@ contract AuctionHouse {
         if (!partyOwnsAsset(this, a.contractAddress, a.recordId)) throw;
 
         a.status = AuctionStatus.Active;
+	AuctionActivated(auctionId);
         return true;
     }
 
@@ -208,7 +213,9 @@ contract AuctionHouse {
         Asset asset = Asset(a.contractAddress);
         asset.setOwner(a.recordId, a.seller);
 
+	AuctionCancelled(auctionId);
         a.status = AuctionStatus.Inactive;
+	return true;
     }
 
     /* BIDS */
@@ -255,6 +262,9 @@ contract AuctionHouse {
 		LogFailure("Could not return the outbid amount to the previous bidder");
 	    }
 	}
+
+	BidPlaced(auctionId, b.bidder, b.amount);
+	return true;
     }
 
     function endAuction(uint auctionId) returns (bool success) {
@@ -271,10 +281,10 @@ contract AuctionHouse {
 	    return true;
 	}
 
-	// If the auction hit its reserve price
 	Bid topBid = a.bids[a.bids.length - 1];
 	Asset asset = Asset(a.contractAddress);
-	
+
+	// If the auction hit its reserve price
 	if (a.currentBid >= a.reservePrice) {
 	    uint distributionShare = a.currentBid * a.distributionCut / 100;  // Calculate the distribution cut
 	    uint sellerShare = a.currentBid - distributionShare;
@@ -283,10 +293,14 @@ contract AuctionHouse {
 	    
 	    if (!a.distributionAddress.send(distributionShare)) { LogFailure("Couldn't send the marketing distribution"); }
 	    if (!a.seller.send(sellerShare)) { LogFailure("Couldn't send the seller his cut"); }
+
+	    AuctionEndedWithWinner(auctionId, topBid.bidder, a.currentBid);
 	} else {
 	    // Return the item to the owner and the money to the top bidder
 	    asset.setOwner(a.recordId, a.seller);
 	    if (!topBid.bidder.send(a.currentBid)) { LogFailure("Couldn't send the top bidder his money back on a failed to meet reserve scenario."); }
+
+	    AuctionEndedWithoutWinner(auctionId, a.currentBid, a.reservePrice);
 	}
 
 	a.status = AuctionStatus.Inactive;
