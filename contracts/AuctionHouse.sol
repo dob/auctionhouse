@@ -213,6 +213,16 @@ contract AuctionHouse {
         Asset asset = Asset(a.contractAddress);
         asset.setOwner(a.recordId, a.seller);
 
+	// Return funds to the bidder
+	uint bidsLength = a.bids.length;
+	if (bidsLength > 0) {
+	    Bid topBid = a.bids[bidsLength - 1];
+	    if (!topBid.bidder.send(topBid.amount)) {
+		LogFailure("Couldn't return funds to the bidder");
+		return false;
+	    }
+	}
+
 	AuctionCancelled(auctionId);
         a.status = AuctionStatus.Inactive;
 	return true;
