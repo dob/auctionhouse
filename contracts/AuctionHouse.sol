@@ -209,6 +209,7 @@ contract AuctionHouse {
         Auction a = auctions[auctionId];
 
         if (!partyOwnsAsset(this, a.contractAddress, a.recordId)) throw;
+	if (a.currentBid >= a.reservePrice) throw;   // Can't cancel the auction if someone has already outbid the reserve.
 
         Asset asset = Asset(a.contractAddress);
         asset.setOwner(a.recordId, a.seller);
