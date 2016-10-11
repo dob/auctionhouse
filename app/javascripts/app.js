@@ -6,29 +6,19 @@ function setStatus(message) {
   status.innerHTML = message;
 };
 
-function refreshBalance() {
-  var meta = MetaCoin.deployed();
-
-  meta.getBalance.call(account, {from: account}).then(function(value) {
-    var balance_element = document.getElementById("balance");
-    balance_element.innerHTML = value.valueOf();
-  }).catch(function(e) {
-    console.log(e);
-    setStatus("Error getting balance; see log.");
-  });
-};
-
 function sendCoin() {
-  var meta = MetaCoin.deployed();
-
-  var amount = parseInt(document.getElementById("amount").value);
-  var receiver = document.getElementById("receiver").value;
+    var sn = SampleName.deployed();
+    var recordId = "8938doug3868686.name22";
 
   setStatus("Initiating transaction... (please wait)");
 
-  meta.sendCoin(receiver, amount, {from: account}).then(function() {
-    setStatus("Transaction complete!");
-    refreshBalance();
+  sn.addRecord(recordId, account, recordId, account, {from: account}).then(function(txnId) {
+      console.log("Transaction id is : " + txnId);
+      setStatus("Transaction complete!");
+
+      sn.owner.call(recordId).then(function(res) {
+	  setStatus("Owner is: " + res);
+      });
   }).catch(function(e) {
     console.log(e);
     setStatus("Error sending coin; see log.");
@@ -48,8 +38,6 @@ window.onload = function() {
     }
 
     accounts = accs;
-    account = accounts[0];
-
-    refreshBalance();
+    account = accounts[1];
   });
 }
