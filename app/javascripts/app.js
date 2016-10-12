@@ -1,5 +1,6 @@
 var accounts;
 var account;
+var auctions;
 
 function setStatus(message) {
   var status = document.getElementById("status");
@@ -14,6 +15,25 @@ function setAuctionStatus(message) {
 function updateAddress() {
     var address = document.getElementById("address");
     address.innerHTML = account;
+}
+
+function updateAuctions() {
+    var auctionSection = document.getElementById("userAuctions");
+    /*auctions = getAuctionsForUser(account);
+    var auctionSection = document.getElementById("userAuctions");
+    var res = ""
+    for (var i = 0; i < auctions.length; i++) {
+	var auc = auctions[i];
+	res = res + "<br>" + auc[3] + ": " + auc[10] + " ETH";
+    }
+    auctionSection.innerHTML = res;*/
+
+    var ah = AuctionHouse.deployed();
+    ah.getAuctionCount.call().then(function(count) {
+	console.log("Called for auctioncount and got " + count);
+	var res = "Auction count is: " + count;
+	auctionSection.innerHTML = res;
+    });
 }
 
 function createAsset() {
@@ -55,6 +75,9 @@ function createAuction() {
 	var startingPrice = web3.toWei(parseFloat(document.getElementById("startingPrice").value), "ether");
 	var reservePrice = web3.toWei(parseFloat(document.getElementById("reservePrice").value), "ether");
 	var deadline = web3.eth.blockNumber + parseInt(document.getElementById("deadline").value);
+	console.log("Setting deadline to " + deadline + " and current block num is " + web3.eth.blockNumber);
+	console.log("Prices, starting/reserve " + startingPrice + "/" + reservePrice);
+	console.log("Marketer is: " + marketer);
 
 	ah.createAuction(recordId,
 			 "Auction for this unique name!",
@@ -67,10 +90,33 @@ function createAuction() {
 			 marketer,
 			 {from: account}).then(function(txId) {
 
-			     setAuctionStatus("Auction created in transaction: " + txId)
+			     setAuctionStatus("Auction created in transaction: " + txId);
+			     updateAuctions();
 			 });
-    })
+    });
 };
+
+function getAuctionsForUser(userAddress) {
+    var ah = AuctionHouse.deployed();
+    var aucs = []
+    /*ah.getAuctionsCountForUser.call(userAddress).then(function(count) {
+	console.log("User has this many auctions " + count);
+	for (var i = 0; i < count; i ++) {
+	    ah.getAuctionIdForUserAndIdx.call(userAddress, i).then(function(idx) {
+		ah.getAuction.call(idx).then(function(auc) {
+		    console.log("Found an auction: " + auc[3]);
+		    aucs.push(auc);
+		});
+	    });
+	}
+	});*/
+
+    /*ah.getAuction.call(0).then(function(auc) {
+	console.log("Found auction 0");
+	aucs.push(auc);
+    });*/
+    return aucs;
+}
 
 window.onload = function() {
   web3.eth.getAccounts(function(err, accs) {
@@ -86,6 +132,24 @@ window.onload = function() {
 
       accounts = accs;
       account = accounts[0];
+
       updateAddress();
+      updateAuctions();
+      watchEvents();
   });
+}
+
+function watchEvents() {
+    var ah = AuctionHouse.deployed();
+    var events = ah.allEvents();
+    //var failure = ah.LogFailure();
+    //var created = ah.AuctionCreated();
+
+    events.watch(function(err, msg) {
+	if(err) {
+	    console.log("Error: " + err);
+	} else { 
+	    console.log("Got an event: " + msg);
+	}
+    });
 }

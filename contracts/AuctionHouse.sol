@@ -1,3 +1,5 @@
+pragma solidity ^0.4.2;
+
 // This is the main contract that governs execution of auctions
 // of non-fungible on-chain assets. Any user can initiate an auction
 // for an item that conforms to the Asset interface described in
@@ -58,12 +60,12 @@ contract AuctionHouse {
 
     modifier onlyOwner {
 	if (owner != msg.sender) throw;
-	_
+	_;
     }
 
     modifier onlySeller(uint auctionId) {
 	if (auctions[auctionId].seller != msg.sender) throw;
-	_
+	_;
     }
 
     modifier onlyLive(uint auctionId) {
@@ -76,7 +78,7 @@ contract AuctionHouse {
 	if (block.number >= a.blockNumberOfDeadline) {
 	    throw;
 	}
-	_
+	_;
     }
     
     function AuctionHouse() {
@@ -104,21 +106,25 @@ contract AuctionHouse {
 
 	    // Check to see if the seller owns the asset at the contract
 	    if (!partyOwnsAsset(msg.sender, _contractAddressOfAsset, _recordIdOfAsset)) {
+		LogFailure("Seller does not own this asset");
 		throw;
 	    }
 
 	    // Check to see if the auction deadline is in the future
 	    if (block.number >= _deadline) {
+		LogFailure("Block number is not in the future");
 		throw;
 	    }
 
 	    // Price validations
 	    if (_startingPrice < 0 || _reservePrice < 0) {
+		LogFailure("StartingPrice or ReservePrice was below zero");
 		throw;
 	    }
 
 	    // Distribution validations
 	    if (_distributionCut < 0 || _distributionCut > 100) {
+		LogFailure("DistributionCut is invalid");
 		throw;
 	    }
 
@@ -179,6 +185,10 @@ contract AuctionHouse {
 		a.currentBid,
 		a.bids.length
         );
+    }
+
+    function getAuctionCount() returns (uint) {
+	return auctions.length;
     }
 
     function getStatus(uint idx) returns (uint) {

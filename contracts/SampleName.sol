@@ -1,3 +1,5 @@
+pragma solidity ^0.4.2;
+
 // Sample implementation of a non fungible asset, which is a name resolved to
 // an ethereum wallet address
 
@@ -14,7 +16,7 @@ contract SampleName is Asset {
 
     modifier onlyOwner(string _recordId) {
 	if (records[_recordId].owner != msg.sender) throw;
-	_
+	_;
     }
 
     function owner(string _recordId) returns (address ownerAddress) {
