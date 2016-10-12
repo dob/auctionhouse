@@ -19,21 +19,21 @@ function updateAddress() {
 
 function updateAuctions() {
     var auctionSection = document.getElementById("userAuctions");
-    /*auctions = getAuctionsForUser(account);
-    var auctionSection = document.getElementById("userAuctions");
-    var res = ""
-    for (var i = 0; i < auctions.length; i++) {
-	var auc = auctions[i];
-	res = res + "<br>" + auc[3] + ": " + auc[10] + " ETH";
-    }
-    auctionSection.innerHTML = res;*/
-
     var ah = AuctionHouse.deployed();
-    ah.getAuctionCount.call().then(function(count) {
-	console.log("Called for auctioncount and got " + count);
-	var res = "Auction count is: " + count;
-	auctionSection.innerHTML = res;
-    });
+    var res = "";
+
+    ah.getAuctionsCountForUser.call(account).then(function(count) {
+	console.log("User has this many auctions " + count);
+	for (var i = 0; i < count; i ++) {
+	    ah.getAuctionIdForUserAndIdx.call(account, i).then(function(idx) {
+		ah.getAuction.call(idx).then(function(auc) {
+		    console.log("Found an auction: " + auc[3]);
+		    res = res + "<br>" + auc[3] + ": " + auc[10] + " ETH";
+		    auctionSection.innerHTML = res;
+		});
+	    });
+	}
+    });    
 }
 
 function createAsset() {
@@ -66,7 +66,7 @@ function createAuction() {
 
     setAuctionStatus("Initiating auction, please wait.");
 
-    var recordId = document.getElementById("nameToReserve").value;
+    var recordId = document.getElementById("nameToAuction").value;
     sn.owner.call(recordId).then(function(res) {
 	if (!(res === account)) {
 	    setAuctionStatus("Looks like you don't own that name");
@@ -88,35 +88,13 @@ function createAuction() {
 			 reservePrice,
 			 10,
 			 marketer,
-			 {from: account}).then(function(txId) {
+			 {from: account, gas:500000}).then(function(txId) {
 
 			     setAuctionStatus("Auction created in transaction: " + txId);
 			     updateAuctions();
 			 });
     });
 };
-
-function getAuctionsForUser(userAddress) {
-    var ah = AuctionHouse.deployed();
-    var aucs = []
-    /*ah.getAuctionsCountForUser.call(userAddress).then(function(count) {
-	console.log("User has this many auctions " + count);
-	for (var i = 0; i < count; i ++) {
-	    ah.getAuctionIdForUserAndIdx.call(userAddress, i).then(function(idx) {
-		ah.getAuction.call(idx).then(function(auc) {
-		    console.log("Found an auction: " + auc[3]);
-		    aucs.push(auc);
-		});
-	    });
-	}
-	});*/
-
-    /*ah.getAuction.call(0).then(function(auc) {
-	console.log("Found auction 0");
-	aucs.push(auc);
-    });*/
-    return aucs;
-}
 
 window.onload = function() {
   web3.eth.getAccounts(function(err, accs) {
@@ -149,7 +127,7 @@ function watchEvents() {
 	if(err) {
 	    console.log("Error: " + err);
 	} else { 
-	    console.log("Got an event: " + msg);
+	    console.log("Got an event: " + msg.event);
 	}
     });
 }
