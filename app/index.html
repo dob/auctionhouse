@@ -7,35 +7,45 @@
     <script src="./app.js"></script>
   </head>
   <body>
+    <div id="statusBar">
+      Your address
+      is: <span class="black"><span id="address"></span></span>
+      <br>
+      Your network is: <span class="black"><span id="network"></span></span>
+    </div>
+    
     <h1>AuctionHouse</h1>
     <h2>Decentralized Asset Auctions</h2>
-    <h3>Your address is: <span class="black"><span id="address"></span></span></h3>
+    <p>Auctionhouse is a decentralized application (Dapp) that lets
+    users auction off non-fungible on-chain assets. What does this
+      mean?  When you have fungible assets like Augur REP tokens, you
+    can easily sell them on an exchange since they're all
+    interchangeable. But when you have a token that represents
+    something one-of-a-kind, something unique, it's better served to
+    auction it off, since there's no liquidity on exchanges for these
+      one off items. Examples of things you can auction include:</p>
 
-    <br>
-    <h1>First reserve a name</h1>
-    <br><label for="nameToReserve">Name To Reserve:</label><input type="text"
-							   id="nameToReserve" placeholder="eg dougwallet.eth"></input>
-    <br><br><button id="send" onclick="createAsset()">Register Name</button>
-    <br><br>
-    <span id="status"></span>
-    <hr />
+    <ul>
+      <li>A domain name in the Ethereum Name Service
+	(auctionhouse.address)</li>
+	<li>An on chain virtual good (the powerful sword in an
+	  Ethereum based RPG)</li>
+	<li>A real world good represented by a token on the blockchain
+	  (a concert ticket)</li>
+      <li>A large block of tokens sellable at once</li>
+      <li>A token that represents a role in an on-chain economy</li>
+      <li>Read more about what you can auction and how it works in our
+      <a href="about.html">about page</a>.</li>
+    </ul>
 
-    <h1>Now auction off your item</h1>
-    <br><label for="nameToAuction">Name To Auction:</label><input type="text"
-							   id="nameToAuction" placeholder="eg dougwallet.eth"></input>
-    <br><label for="startingPrice">Starting Price in Ether:</label><input type="text"
-							   id="startingPrice" placeholder="eg 2.2"></input>
-    <br><label for="reservePrice">Reserve Price in Ether:</label><input type="text"
-							   id="reservePrice" placeholder="eg 3.0"></input>
-    <br><label for="deadline">Deadline in blocks:</label><input type="text"
-							   id="deadline" placeholder="eg 200"></input>
-    <br><br><button id="createAuction" onclick="createAuction()">Create Auction</button>
-    <br><br>
-    <span id="auctionstatus"></span>
-    
+    <div id="createAnAuction"><a href="createAuction.html">Create an auction</a></div>
+
     <hr />
-    <h2>Your active auctions</h2>
+    <h2>Currently running auctions</h2>
     <span id="userAuctions"></span>
-    
+
+    <hr />
+    <span id="status"></span>
+
   </body>
 </html>
