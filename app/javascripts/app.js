@@ -3,7 +3,7 @@ var account;
 var auctions;
 
 function setStatus(message) {
-  var status = document.getElementById("status");
+  var status = document.getElementById("statusMessage");
   status.innerHTML = message;
 };
 
