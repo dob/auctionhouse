@@ -3,6 +3,7 @@ var account;
 var auctions;
 var auctionHouseContract;
 var auction;
+var currentBlockNumber;
 
 function setStatus(message) {
   var status = document.getElementById("status");
@@ -42,19 +43,6 @@ function refreshAuction() {
       }
 
       ah.getAuction.call(auctionId).then(function(result) {
-
-// a.seller,
-//     a.contractAddress,
-//     a.recordId,
-//     a.title,
-//     a.description,
-//     a.blockNumberOfDeadline,
-//     a.distributionCut,
-//     a.distributionAddress,
-//     a.startingPrice,
-//     a.reservePrice,
-//     a.currentBid,
-//     a.bids.length
         auction["seller"] = result[0];
         auction["contractAddress"] = result[1];
         auction["recordId"] = result[2];
@@ -68,8 +56,6 @@ function refreshAuction() {
         auction["currentBid"] = result[10].toNumber();
         auction["bidCount"] = result[11].toNumber();
 
-        // console.log(result);
-        // console.log(auction);
 
         var container = document.getElementById("auction_container");
         container.innerHTML = constructAuctionView(auction);
@@ -78,18 +64,6 @@ function refreshAuction() {
 
     });
 
-    // ah.getAuctionsCountForUser.call(account).then(function(count) {
-    // 	console.log("User has this many auctions " + count);
-    // 	for (var i = 0; i < count; i ++) {
-  	 //    ah.getAuctionIdForUserAndIdx.call(account, i).then(function(idx) {
-    //   		ah.getAuction.call(idx).then(function(auc) {
-    //   		    console.log("Found an auction: " + auc[3]);
-    //   		    res = res + "<br>" + auc[3] + ": " + auc[10] + " ETH";
-    //   		    auctionSection.innerHTML = res;
-    //   		});
-  	 //    });
-	   //  }
-    // });
 }
 
 // function activateAuction(auctionId, recordId) {
@@ -124,6 +98,13 @@ function placeBid() {
   });
 }
 
+function endAuction() {
+  auctionHouseContract.endAuction(auction["auctionId"], {from:account, gas: 1400000}).then(function(txnId) {
+    console.log("End auction txnId: " + txnId)
+    refreshAuction();
+  });
+}
+
 function isOwner() {
   return true;
 }
@@ -133,14 +114,24 @@ function constructAuctionView(auction) {
   result += "<div id='seller_address'>Seller: " + auction["seller"] + "</div>";
   result += "<div id='title'>Title: " + auction["title"] + "</div>";
   result += "<div id='description'>Description: " + auction["description"] + "</div>";
-  result += "<div id='currentBid'>Current Bid: " + auction["currentBid"] + " ethers</div>";
+  result += "<div id='currentBid'>Current Bid: " + web3.fromWei(auction["currentBid"], 'ether') + " ethers</div>";
   result += "<div id='bidCount'>Number of Bids: " + auction["bidCount"] + "</div>";
+  result += "<div id='deadline'>Deadline Block Number: " + auction["blockNumberOfDeadline"] + "</div>";
 
+  //Activate auction button
   if (auction["status"] == "Pending" && isOwner()) {
     result += "<button id='activation_button' onclick='activateAuction()'>Activate Auction</button>";
-  } else if (auction["status"] == "Active") {
+  } 
+
+  //Place bid button
+  if (auction["status"] == "Active" && currentBlockNumber <= auction["blockNumberOfDeadline"]) {
     result += "<label for='bid_value'>Bid (in eth):</label><input type='text' id='bid_value' placeholder='eg 3.0'></input>";
     result += "<button id='bid_button' onclick='placeBid()'>Place Bid</button>";
+  }
+
+  //End auction button
+  if (auction["status"] == "Active" && auction["seller"] == account && currentBlockNumber > auction["blockNumberOfDeadline"]) {
+    result += "<button id='end_button' onclick='endAuction()'>End Auction</button>";
   }
 
   return result;
@@ -205,6 +196,7 @@ window.onload = function() {
 
       updateAddress();
       refreshAuction();
+      updateBlockNumber();
       watchEvents();
   });
 }
@@ -219,17 +211,30 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
+
 function watchEvents() {
     var ah = AuctionHouse.deployed();
     var events = ah.allEvents();
-    //var failure = ah.LogFailure();
-    //var created = ah.AuctionCreated();
 
     events.watch(function(err, msg) {
-	if(err) {
-	    console.log("Error: " + err);
-	} else { 
-	    console.log("Got an event: " + msg.event);
-	}
+      if(err) {
+          console.log("Error: " + err);
+      } else { 
+          console.log("Got an event: " + msg.event);
+      }
+        });
+
+        var filter = web3.eth.filter("latest");
+        filter.watch(function(err, block) {
+      // Call get block number on every block
+      updateBlockNumber();
+    });
+}
+
+
+function updateBlockNumber() {
+    web3.eth.getBlockNumber(function(err, blockNumber) {
+  currentBlockNumber = blockNumber;
+  console.log("Current block number is: " + blockNumber);
     });
 }
