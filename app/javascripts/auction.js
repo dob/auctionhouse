@@ -68,6 +68,10 @@ function refreshAuction() {
 
 // function activateAuction(auctionId, recordId) {
 function activateAuction() {
+  if (!isOwner()) {
+    setStatus("Only seller can activate auction.");
+  }
+
   //Transfer ownership to the contract
   var sn = SampleName.deployed();
   console.log(auction["recordId"]);
@@ -120,7 +124,7 @@ function endAuction() {
 }
 
 function isOwner() {
-  return true;
+  return auction["seller"] == account;
 }
 
 function constructAuctionView(auction) {
@@ -151,42 +155,6 @@ function constructAuctionView(auction) {
   return result;
 }
 
-function createAuction() {
-    var sn = SampleName.deployed();
-    var ah = AuctionHouse.deployed();
-    var marketer = "0x536d6b87f21d8bbf23dd7f33fc3ca90e85cba0b6";
-
-    setAuctionStatus("Initiating auction, please wait.");
-
-    var recordId = document.getElementById("nameToAuction").value;
-    sn.owner.call(recordId).then(function(res) {
-	if (!(res === account)) {
-	    setAuctionStatus("Looks like you don't own that name");
-	    return;
-	}
-	var startingPrice = web3.toWei(parseFloat(document.getElementById("startingPrice").value), "ether");
-	var reservePrice = web3.toWei(parseFloat(document.getElementById("reservePrice").value), "ether");
-	var deadline = web3.eth.blockNumber + parseInt(document.getElementById("deadline").value);
-	console.log("Setting deadline to " + deadline + " and current block num is " + web3.eth.blockNumber);
-	console.log("Prices, starting/reserve " + startingPrice + "/" + reservePrice);
-	console.log("Marketer is: " + marketer);
-
-	ah.createAuction(recordId,
-			 "Auction for this unique name!",
-			 sn.address,
-			 recordId,
-			 deadline,
-			 startingPrice,
-			 reservePrice,
-			 10,
-			 marketer,
-			 {from: account, gas:500000}).then(function(txId) {
-
-			     setAuctionStatus("Auction created in transaction: " + txId);
-			     refreshAuction();
-			 });
-    });
-};
 
 window.onload = function() {
   auctionHouseContract = AuctionHouse.deployed();
