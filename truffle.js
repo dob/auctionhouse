@@ -5,6 +5,7 @@ module.exports = {
     "header.html": "header.html",
     "footer.html": "footer.html",
     "createAuction.html": "createAuction.html",
+    "about.html": "about.html",
     "app.js": [
       "javascripts/app.js",
     ],
