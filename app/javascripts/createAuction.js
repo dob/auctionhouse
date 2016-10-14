@@ -4,7 +4,7 @@ var auctions;
 var currentBlockNumber;
 
 function setStatus(message) {
-  var status = document.getElementById("status");
+  var status = document.getElementById("statusMessage");
   status.innerHTML = message;
 };
 
@@ -16,6 +16,18 @@ function setAuctionStatus(message) {
 function updateAddress() {
     var address = document.getElementById("address");
     address.innerHTML = account;
+
+    var ethBalance = document.getElementById("ethBalance");
+    web3.eth.getBalance(account, function(err, bal) {
+	ethBalance.innerHTML = web3.fromWei(bal, "ether") + " ETH";
+    });
+}
+
+function updateNetwork() {
+    var network = document.getElementById("network");
+    var provider = web3.version.getNetwork(function(err, net) {
+	network.innerHTML = net;
+    });
 }
 
 function updateAuctions() {
@@ -113,6 +125,7 @@ window.onload = function() {
       account = accounts[0];
 
       updateAddress();
+      updateNetwork();
       updateAuctions();
       updateBlockNumber();
       watchEvents();

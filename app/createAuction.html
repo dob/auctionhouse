@@ -1,42 +1,134 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
     <title>AuctionHouse Dapp</title>
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link href="./app.css" rel='stylesheet' type='text/css'>
-    <script src="./app.js"></script>
-    <script src="./createAuction.js"></script>
+
+        <!-- Bootstrap -->
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap-theme.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <link href="app.css" rel='stylesheet' type='text/css'>
+    <script src="app.js"></script>
+    <script src="createAuction.js"></script>
   </head>
   <body>
-    <h1>AuctionHouse</h1>
-    <h2>Decentralized Asset Auctions</h2>
-    <h3>Your address is: <span class="black"><span id="address"></span></span></h3>
 
-    <br>
-    <h1>First reserve a name</h1>
-    <br><label for="nameToReserve">Name To Reserve:</label><input type="text"
-							   id="nameToReserve" placeholder="eg dougwallet.eth"></input>
-    <br><br><button id="send" onclick="createAsset()">Register Name</button>
-    <br><br>
-    <span id="status"></span>
-    <hr />
+        <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">AuctionHouse</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#auctionSection">Auctions</a></li>
+            <li><a href="createAuction.html">New Auction</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
 
-    <h1>Now auction off your item</h1>
-    <br><label for="nameToAuction">Name To Auction:</label><input type="text"
-							   id="nameToAuction" placeholder="eg dougwallet.eth"></input>
-    <br><label for="startingPrice">Starting Price in Ether:</label><input type="text"
-							   id="startingPrice" placeholder="eg 2.2"></input>
-    <br><label for="reservePrice">Reserve Price in Ether:</label><input type="text"
-							   id="reservePrice" placeholder="eg 3.0"></input>
-    <br><label for="deadline">Deadline in blocks:</label><input type="text"
-							   id="deadline" placeholder="eg 200"></input>
-    <br><br><button id="createAuction" onclick="createAuction()">Create Auction</button>
-    <br><br>
-    <span id="auctionstatus"></span>
-    
-    <hr />
-    <h2>Your active auctions</h2>
-    <span id="userAuctions"></span>
-    
+    <div class="container theme-showcase" role="main">
+
+      <!-- Going to set up an 8-4 column grid -->
+      <div class="row">
+	<div class="col-md-8">
+	
+	  <!-- Main jumbotron for a primary marketing message or call to action -->
+	  <div id="header"></div>
+
+	  <h1>First reserve a name</h1>
+	  <br><label for="nameToReserve">Name To Reserve:</label><input type="text"
+									id="nameToReserve" placeholder="eg dougwallet.eth"></input>
+	  <br><br><button id="send" onclick="createAsset()">Register Name</button>
+	  <br><br>
+	  <span id="status"></span>
+	  <hr />
+
+	  <h1>Now auction off your item</h1>
+	  <br><label for="nameToAuction">Name To Auction:</label><input type="text"
+									id="nameToAuction" placeholder="eg dougwallet.eth"></input>
+	  <br><label for="startingPrice">Starting Price in Ether:</label><input type="text"
+										id="startingPrice" placeholder="eg 2.2"></input>
+	  <br><label for="reservePrice">Reserve Price in Ether:</label><input type="text"
+									      id="reservePrice" placeholder="eg 3.0"></input>
+	  <br><label for="deadline">Deadline in blocks:</label><input type="text"
+								      id="deadline" placeholder="eg 200"></input>
+	  <br><br><button id="createAuction" onclick="createAuction()">Create Auction</button>
+	  <br><br>
+	  <span id="auctionstatus"></span>
+	  
+	  <hr />
+	  <h2>Your active auctions</h2>
+	  <span id="userAuctions"></span>
+
+	</div> <!-- The column of 8 -->
+
+
+	<div class="col-md-4"> <!-- The right column of 4 -->
+          <div class="panel panel-success" id="statusPanel">
+            <div class="panel-heading">
+              <h3 class="panel-title">Ethereum Status</h3>
+            </div>
+            <div class="panel-body">
+	      <p>
+		Your address:
+		<span id="address"></span>
+		<br>
+		Your balance: <span id="ethBalance"></span>
+		<br>
+		Your network: <span id="network"></span>
+	      </p>
+
+	      <p><span id="statusMessage"></span></p>
+            </div>
+	  </div>
+
+	  <div class="panel panel-info" id="infoPanel">
+	    <div class="panel-heading">
+	      <h3 class="panel-title">What's going on here?</h3>
+	    </div>
+	    <div class="panel-body">
+	      <p>This homepage lists the currently running
+		auctions. Check them out, or create your own!</p>
+	      <p>Auctionhouse is a decentralized application (Dapp) that lets
+	      users auction off non-fungible on-chain assets. What does this
+	      mean?  When you have fungible assets like Augur REP tokens, you
+	      can easily sell them on an exchange since they're all
+	      interchangeable. But when you have a token that represents
+	      something one-of-a-kind, something unique, it's better served to
+	      auction it off, since there's no liquidity on exchanges for these
+	      one off items.</p>
+	    </div>
+	  </div>
+	
+      </div> <!-- original row -->
+    </div><!-- container -->
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="bootstrap.min.js"></script>
   </body>
 </html>
