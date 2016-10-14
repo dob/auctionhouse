@@ -5,7 +5,7 @@ var auctionHouseContract;
 var auction;
 
 function setStatus(message) {
-  var status = document.getElementById("status");
+  var status = document.getElementById("statusMessage");
   status.innerHTML = message;
 };
 
@@ -111,16 +111,27 @@ function activateAuction() {
 
 function placeBid() {
   var bid = document.getElementById("bid_value").value;
-  console.log("bid: " + bid);
+
+    setStatus("Bid is being placed, hang tight...")
 
   if (bid < auction["currentBid"])
     setStatus("Bid has to be at least " + auction["currentBid"]);
 
   console.log({from:account, value:web3.toWei(bid, 'ether'), gas: 1400000});
-  console.log(auction["auctionId"]);
-  auctionHouseContract.placeBid(auction["auctionId"], {from:account, value:web3.toWei(bid, 'ether'), gas: 1400000}).then(function(txnId) {
-    console.log("Bid txnId: " + txnId);
-    refreshAuction();
+
+    var gas = 1400000;
+    auctionHouseContract.placeBid(auction["auctionId"], {from:account, value:web3.toWei(bid, 'ether'), gas: gas}).then(function(txnId) {
+	console.log("Bid txnId: " + txnId);
+	web3.eth.getTransactionReceipt(txnId, function(err, txnReceipt) {
+	    if (txnReceipt.gasUsed == gas) {
+		console.log("We had a failed bid " + txnReceipt);
+		setStatus("Bid failed");
+	    } else {
+		console.log("We had a successful bid " + txnReceipt);
+		setStatus("Bid succeeded!");
+	    }
+	});
+	refreshAuction();
   });
 }
 
@@ -133,7 +144,7 @@ function constructAuctionView(auction) {
   result += "<div id='seller_address'>Seller: " + auction["seller"] + "</div>";
   result += "<div id='title'>Title: " + auction["title"] + "</div>";
   result += "<div id='description'>Description: " + auction["description"] + "</div>";
-  result += "<div id='currentBid'>Current Bid: " + auction["currentBid"] + " ethers</div>";
+    result += "<div id='currentBid'>Current Bid: " + web3.fromWei(auction["currentBid"], "ether") + " ETH</div>";
   result += "<div id='bidCount'>Number of Bids: " + auction["bidCount"] + "</div>";
 
   if (auction["status"] == "Pending" && isOwner()) {
