@@ -5,37 +5,16 @@
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link href="./app.css" rel='stylesheet' type='text/css'>
     <script src="./app.js"></script>
+    <script src="./auction.js"></script>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
   </head>
   <body>
-    <h1>AuctionHouse</h1>
-    <h2>Decentralized Asset Auctions</h2>
-    <h3>Your address is: <span class="black"><span id="address"></span></span></h3>
-
+    <div id="header"></div>
     <br>
-    <h1>First reserve a name</h1>
-    <br><label for="nameToReserve">Name To Reserve:</label><input type="text"
-							   id="nameToReserve" placeholder="eg dougwallet.eth"></input>
-    <br><br><button id="send" onclick="createAsset()">Register Name</button>
-    <br><br>
-    <span id="status"></span>
-    <hr />
 
-    <h1>Now auction off your item</h1>
-    <br><label for="nameToAuction">Name To Auction:</label><input type="text"
-							   id="nameToAuction" placeholder="eg dougwallet.eth"></input>
-    <br><label for="startingPrice">Starting Price in Ether:</label><input type="text"
-							   id="startingPrice" placeholder="eg 2.2"></input>
-    <br><label for="reservePrice">Reserve Price in Ether:</label><input type="text"
-							   id="reservePrice" placeholder="eg 3.0"></input>
-    <br><label for="deadline">Deadline in blocks:</label><input type="text"
-							   id="deadline" placeholder="eg 200"></input>
-    <br><br><button id="createAuction" onclick="createAuction()">Create Auction</button>
-    <br><br>
-    <span id="auctionstatus"></span>
+    <!-- Attributes of the auction -->
+    <div id="auction_container"></div>
     
-    <hr />
-    <h2>Your active auctions</h2>
-    <span id="userAuctions"></span>
-    
+    <div id="footer"></div>
   </body>
 </html>

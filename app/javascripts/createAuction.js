@@ -1,6 +1,7 @@
 var accounts;
 var account;
 var auctions;
+var currentBlockNumber;
 
 function setStatus(message) {
   var status = document.getElementById("status");
@@ -74,8 +75,8 @@ function createAuction() {
 	}
 	var startingPrice = web3.toWei(parseFloat(document.getElementById("startingPrice").value), "ether");
 	var reservePrice = web3.toWei(parseFloat(document.getElementById("reservePrice").value), "ether");
-	var deadline = web3.eth.blockNumber + parseInt(document.getElementById("deadline").value);
-	console.log("Setting deadline to " + deadline + " and current block num is " + web3.eth.blockNumber);
+	var deadline = currentBlockNumber + parseInt(document.getElementById("deadline").value);
+	console.log("Setting deadline to " + deadline + " and current block num is " + currentBlockNumber);
 	console.log("Prices, starting/reserve " + startingPrice + "/" + reservePrice);
 	console.log("Marketer is: " + marketer);
 
@@ -113,6 +114,7 @@ window.onload = function() {
 
       updateAddress();
       updateAuctions();
+      updateBlockNumber();
       watchEvents();
   });
 }
@@ -120,14 +122,25 @@ window.onload = function() {
 function watchEvents() {
     var ah = AuctionHouse.deployed();
     var events = ah.allEvents();
-    //var failure = ah.LogFailure();
-    //var created = ah.AuctionCreated();
 
     events.watch(function(err, msg) {
-	if(err) {
-	    console.log("Error: " + err);
-	} else { 
-	    console.log("Got an event: " + msg.event);
-	}
+  if(err) {
+      console.log("Error: " + err);
+  } else { 
+      console.log("Got an event: " + msg.event);
+  }
+    });
+
+    var filter = web3.eth.filter("latest");
+    filter.watch(function(err, block) {
+  // Call get block number on every block
+  updateBlockNumber();
+    });
+}
+
+function updateBlockNumber() {
+    web3.eth.getBlockNumber(function(err, blockNumber) {
+  currentBlockNumber = blockNumber;
+  console.log("Current block number is: " + blockNumber);
     });
 }

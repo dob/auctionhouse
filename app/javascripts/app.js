@@ -48,7 +48,7 @@ function updateAuctions() {
 		    for (var j = 0; j < count; j++) {
 			var auc = aucs[j];
 			res = res + "<tr>";
-			res = res + "<td><a href='auctions.html?auctionId=" + j + "'>" + auc[3] + "</a></td>";
+			res = res + "<td><a href='auction.html?auctionId=" + j + "'>" + auc[3] + "</a></td>";
 			res = res + "<td>" + auc[10] + " ETH" + "</td>";
 			res = res + "<td>" + auc[11] + "</td>";
 			res = res + "<td>" + auc[5] + "</td>";

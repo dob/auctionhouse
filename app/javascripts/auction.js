@@ -1,14 +1,11 @@
 var accounts;
 var account;
 var auctions;
+var auctionHouseContract;
+var auction;
 
 function setStatus(message) {
   var status = document.getElementById("status");
-  status.innerHTML = message;
-};
-
-function setAuctionStatus(message) {
-  var status = document.getElementById("auctionstatus");
   status.innerHTML = message;
 };
 
@@ -17,47 +14,137 @@ function updateAddress() {
     address.innerHTML = account;
 }
 
-function updateAuctions() {
-    var auctionSection = document.getElementById("userAuctions");
+function refreshAuction() {
+    var auctionId = getParameterByName("auctionId");
     var ah = AuctionHouse.deployed();
-    var res = "";
+    auction = {"auctionId": auctionId};
 
-    ah.getAuctionsCountForUser.call(account).then(function(count) {
-	console.log("User has this many auctions " + count);
-	for (var i = 0; i < count; i ++) {
-	    ah.getAuctionIdForUserAndIdx.call(account, i).then(function(idx) {
-		ah.getAuction.call(idx).then(function(auc) {
-		    console.log("Found an auction: " + auc[3]);
-		    res = res + "<br>" + auc[3] + ": " + auc[10] + " ETH";
-		    auctionSection.innerHTML = res;
-		});
-	    });
-	}
-    });    
+    auctionHouseContract.getAuctionCount.call().then(function(auctionCount) {
+      // console.log(auctionCount.toNumber());
+      if (auctionCount.toNumber() < auctionId) {
+        setStatus("Cannot find auction: " + auctionId);
+        throw new Error();
+        //Redirect to 404 page
+      }
+    });
+
+    ah.getStatus.call(auctionId).then(function(auctionStatus) {
+      // console.log("status:" + auctionStatus);
+      if (auctionStatus == 0) {
+        auction["status"] = "Pending";
+      } else if (auctionStatus == 1) {
+        auction["status"] = "Active";
+      } else if (auctionStatus == 2) {
+        auction["status"] = "Inactive";
+      } else {
+        alert("Unknown status: " + auctionStatus);
+        // console.log("Unknown status: " + auctionStatus);
+      }
+
+      ah.getAuction.call(auctionId).then(function(result) {
+
+// a.seller,
+//     a.contractAddress,
+//     a.recordId,
+//     a.title,
+//     a.description,
+//     a.blockNumberOfDeadline,
+//     a.distributionCut,
+//     a.distributionAddress,
+//     a.startingPrice,
+//     a.reservePrice,
+//     a.currentBid,
+//     a.bids.length
+        auction["seller"] = result[0];
+        auction["contractAddress"] = result[1];
+        auction["recordId"] = result[2];
+        auction["title"] = result[3];
+        auction["description"] = result[4];
+        auction["blockNumberOfDeadline"] = result[5].toNumber();
+        auction["distributionCut"] = result[6].toNumber();
+        auction["distributionAddress"] = result[7]
+        auction["startingPrice"] = result[8].toNumber();
+        auction["reservePrice"] = result[9].toNumber();
+        auction["currentBid"] = result[10].toNumber();
+        auction["bidCount"] = result[11].toNumber();
+
+        // console.log(result);
+        // console.log(auction);
+
+        var container = document.getElementById("auction_container");
+        container.innerHTML = constructAuctionView(auction);
+
+      });
+
+    });
+
+    // ah.getAuctionsCountForUser.call(account).then(function(count) {
+    // 	console.log("User has this many auctions " + count);
+    // 	for (var i = 0; i < count; i ++) {
+  	 //    ah.getAuctionIdForUserAndIdx.call(account, i).then(function(idx) {
+    //   		ah.getAuction.call(idx).then(function(auc) {
+    //   		    console.log("Found an auction: " + auc[3]);
+    //   		    res = res + "<br>" + auc[3] + ": " + auc[10] + " ETH";
+    //   		    auctionSection.innerHTML = res;
+    //   		});
+  	 //    });
+	   //  }
+    // });
 }
 
-function createAsset() {
-    var sn = SampleName.deployed();
-    var recordId = document.getElementById("nameToReserve").value;
+// function activateAuction(auctionId, recordId) {
+function activateAuction() {
+  //Transfer ownership to the contract
+  var sn = SampleName.deployed();
+  console.log(auction["recordId"]);
+  console.log(auctionHouseContract.address);
 
-  setStatus("Initiating transaction... (please wait)");
-
-  sn.addRecord(recordId, account, recordId, account, {from: account}).then(function(txnId) {
-      console.log("Transaction id is : " + txnId);
-      setStatus("Transaction complete!");
-
-      sn.owner.call(recordId).then(function(res) {
-	  if (res === account) {
-	      setStatus("You are the proud owner of the name: " + recordId);
-	  } else {
-	      setStatus("It looks like the owner of that name is: " + res);
-	  }
-      });
-  }).catch(function(e) {
-    console.log(e);
-    setStatus("Error registering name. See log.");
+  sn.setOwner(auction["recordId"], auctionHouseContract.address, {from: account, gas: 500000}).then(function(txnId) {
+    console.log("set owner transaction: " + txnId);
+    //Activate the auction
+    auctionHouseContract.activateAuction(auction["auctionId"], {from: account, gas: 500000}).then(function(txnId) {
+      console.log(txnId);
+      refreshAuction();
+    });
   });
-};
+}
+
+function placeBid() {
+  var bid = document.getElementById("bid_value").value;
+  console.log("bid: " + bid);
+
+  if (bid < auction["currentBid"])
+    setStatus("Bid has to be at least " + auction["currentBid"]);
+
+  console.log({from:account, value:web3.toWei(bid, 'ether'), gas: 1400000});
+  console.log(auction["auctionId"]);
+  auctionHouseContract.placeBid(auction["auctionId"], {from:account, value:web3.toWei(bid, 'ether'), gas: 1400000}).then(function(txnId) {
+    console.log("Bid txnId: " + txnId);
+    refreshAuction();
+  });
+}
+
+function isOwner() {
+  return true;
+}
+
+function constructAuctionView(auction) {
+  result = "<div id='status'>Status: " + auction["status"] + "</div>";
+  result += "<div id='seller_address'>Seller: " + auction["seller"] + "</div>";
+  result += "<div id='title'>Title: " + auction["title"] + "</div>";
+  result += "<div id='description'>Description: " + auction["description"] + "</div>";
+  result += "<div id='currentBid'>Current Bid: " + auction["currentBid"] + " ethers</div>";
+  result += "<div id='bidCount'>Number of Bids: " + auction["bidCount"] + "</div>";
+
+  if (auction["status"] == "Pending" && isOwner()) {
+    result += "<button id='activation_button' onclick='activateAuction()'>Activate Auction</button>";
+  } else if (auction["status"] == "Active") {
+    result += "<label for='bid_value'>Bid (in eth):</label><input type='text' id='bid_value' placeholder='eg 3.0'></input>";
+    result += "<button id='bid_button' onclick='placeBid()'>Place Bid</button>";
+  }
+
+  return result;
+}
 
 function createAuction() {
     var sn = SampleName.deployed();
@@ -91,12 +178,17 @@ function createAuction() {
 			 {from: account, gas:500000}).then(function(txId) {
 
 			     setAuctionStatus("Auction created in transaction: " + txId);
-			     updateAuctions();
+			     refreshAuction();
 			 });
     });
 };
 
 window.onload = function() {
+  auctionHouseContract = AuctionHouse.deployed();
+
+  $("#header").load("header.html"); 
+  $("#footer").load("footer.html"); 
+
   web3.eth.getAccounts(function(err, accs) {
     if (err != null) {
       alert("There was an error fetching your accounts.");
@@ -112,9 +204,19 @@ window.onload = function() {
       account = accounts[0];
 
       updateAddress();
-      updateAuctions();
+      refreshAuction();
       watchEvents();
   });
+}
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
 function watchEvents() {

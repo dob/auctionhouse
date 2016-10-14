@@ -69,15 +69,15 @@ contract AuctionHouse {
     }
 
     modifier onlyLive(uint auctionId) {
-	Auction a = auctions[auctionId];
-	if (a.status != AuctionStatus.Active) {
-	    throw;
-	}
+	// Auction a = auctions[auctionId];
+	// if (a.status != AuctionStatus.Active) {
+	//     throw;
+	// }
 
-	// Auction should not be over
-	if (block.number >= a.blockNumberOfDeadline) {
-	    throw;
-	}
+	// // Auction should not be over
+	// if (block.number >= a.blockNumberOfDeadline) {
+	//     throw;
+	// }
 	_;
     }
     
@@ -172,6 +172,10 @@ contract AuctionHouse {
      */
     function getAuction(uint idx) returns (address, address, string, string, string, uint, uint, address, uint256, uint256, uint256, uint) {
 	Auction a = auctions[idx];
+    if (a.seller == 0) {
+        throw;
+    }
+
 	return (a.seller,
 		a.contractAddress,
 		a.recordId,
@@ -255,7 +259,16 @@ contract AuctionHouse {
 	return (b.bidder, b.amount, b.timestamp);
     }
 
-    function placeBid(uint auctionId) onlyLive(auctionId) returns (bool success) {
+    function placeBidTest(uint auctionId) returns (bool) {
+        return true;
+    }
+
+    function testFunction() {
+        uint128 amount = uint128(msg.value);
+        //send the ether somewhere
+    }
+
+    function placeBid(uint auctionId) payable onlyLive(auctionId) returns (bool success) {
 	uint256 amount = msg.value;
 	Auction a = auctions[auctionId];
 
