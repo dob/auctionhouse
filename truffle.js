@@ -14,6 +14,15 @@ module.exports = {
     "createAuction.js": [
       "javascripts/createAuction.js"
     ],
+    "bootstrap.min.js": [
+      "javascripts/bootstrap.min.js"
+    ],
+    "bootstrap.min.css": [
+      "stylesheets/bootstrap.min.css"
+    ],
+    "bootstrap-theme.min.css": [
+      "stylesheets/bootstrap-theme.min.css"
+    ],
     "app.css": [
       "stylesheets/app.css"
     ],

@@ -11,6 +11,10 @@ function updateAddress() {
     var address = document.getElementById("address");
     address.innerHTML = account;
 
+    var ethBalance = document.getElementById("ethBalance");
+    web3.eth.getBalance(account, function(err, bal) {
+	ethBalance.innerHTML = web3.fromWei(bal, "ether") + " ETH";
+    });
 }
 
 function updateNetwork() {
@@ -42,19 +46,15 @@ function updateAuctions() {
 		aucs.push(auction);
 
 		if (aucs.length == count) {
-		    res = "<table>";
-		    res += "<tr><td>Title</td><td>Current Bid</td><td>Number of Bids</td><td>Ending Block</td></tr>";
-
 		    for (var j = 0; j < count; j++) {
 			var auc = aucs[j];
 			res = res + "<tr>";
 			res = res + "<td><a href='auction.html?auctionId=" + j + "'>" + auc[3] + "</a></td>";
-			res = res + "<td>" + auc[10] + " ETH" + "</td>";
+			res = res + "<td>" + web3.fromWei(auc[10], "ether") + " ETH" + "</td>";
 			res = res + "<td>" + auc[11] + "</td>";
 			res = res + "<td>" + auc[5] + "</td>";
 			res = res + "</tr>";
 		    }
-		    res = res + "</table>";
 		    auctionSection.innerHTML = res;
 		    setStatus("");
 		}
