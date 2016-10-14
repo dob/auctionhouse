@@ -27,6 +27,8 @@ contract("AuctionHouse", function(accounts) {
 	var owner = accounts[0];
 	var recordId = "test2.name";
 	var targetAuctionId = 0;
+	var startingBid = web3.toWei(0.2, "ether");
+	var reservePrice = web3.toWei(0.3, "ether");
 
 	// Start by creating a sample record
 	sn.addRecord(recordId, owner, recordId, owner, {from:owner}).then(function(txId) {
@@ -37,15 +39,15 @@ contract("AuctionHouse", function(accounts) {
 					sn.address,
 					recordId,
 					web3.eth.blockNumber + 100,
-					(2 * 10^6),
-					(3 * 10^6),
+					startingBid,
+					reservePrice,
 					5,
 					accounts[2], {from:owner}).then(function(txId) {
 
 					    return ah.getAuction.call(targetAuctionId).then(function(auction) {
 						assert.strictEqual(auction[0], owner, "Didn't get the correct seller");
 						assert.strictEqual(auction[3], "Title", "Didn't get an updated auction");
-						assert.strictEqual(auction[10].toNumber(), 0, "Didn't get an updated auction bid price");
+						assert.equal(auction[10], startingBid, "Didn't get an updated auction bid price");
 						return ah.getAuctionsCountForUser.call(owner);
 					    }).then(function(auctionsCount) {
 					 	assert.strictEqual(auctionsCount.toNumber(), 1, "Should only have 1 auction");

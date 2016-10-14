@@ -55,7 +55,7 @@ contract("AuctionHouse", function(accounts) {
 				     return ah.endAuction(auctionId);
 				 }).then(function(){
 				     log("AUCTION OVER " + web3.eth.blockNumber);
-				     sellerBalanceAfterClose = balance(owner);
+				     sellerBalanceAfterClose = balance(owner).toNumber();
 				     contractBalanceAfterClose = balance(ah.address);
 				     bidderBalanceAfterClose = balance(bidder);
 				     marketerBalanceAfterClose = balance(marketer);

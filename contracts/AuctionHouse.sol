@@ -141,7 +141,7 @@ contract AuctionHouse {
 	    a.distributionAddress = _distributionCutAddress;
 	    a.startingPrice = _startingPrice;
 	    a.reservePrice = _reservePrice;
-	    a.currentBid = 0;
+	    a.currentBid = _startingPrice;
 
             auctionsRunByUser[a.seller].push(auctionId);
 	    AuctionCreated(auctionId, a.title, a.startingPrice, a.reservePrice);
