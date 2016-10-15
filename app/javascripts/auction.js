@@ -107,8 +107,8 @@ function placeBid() {
     setStatus("Bid is being placed, hang tight...")
 
     if (bid < auction["currentBid"]) {
-	setStatus("Bid has to be at least " + auction["currentBid"]);
-	return;
+    	setStatus("Bid has to be at least " + web3.fromWei(auction["currentBid"], "ether"));
+    	return;
     }
 
     console.log({from:account, value:bid, gas: 1400000});
