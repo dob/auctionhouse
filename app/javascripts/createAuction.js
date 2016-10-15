@@ -2,6 +2,8 @@ var accounts;
 var account;
 var auctions;
 var currentBlockNumber;
+var auctionHouseContract;
+var sampleNameContract;
 
 function setStatus(message) {
   var status = document.getElementById("statusMessage");
@@ -32,14 +34,13 @@ function updateNetwork() {
 
 function updateAuctions() {
     var auctionSection = document.getElementById("userAuctions");
-    var ah = AuctionHouse.deployed();
     var res = "";
 
-    ah.getAuctionsCountForUser.call(account).then(function(count) {
+    auctionHouseContract.getAuctionsCountForUser.call(account).then(function(count) {
 	console.log("User has this many auctions " + count);
 	for (var i = 0; i < count; i ++) {
-	    ah.getAuctionIdForUserAndIdx.call(account, i).then(function(idx) {
-		ah.getAuction.call(idx).then(function(auc) {
+	    auctionHouseContract.getAuctionIdForUserAndIdx.call(account, i).then(function(idx) {
+		auctionHouseContract.getAuction.call(idx).then(function(auc) {
 		    console.log("Found an auction: " + auc[3]);
 		    res = res + "<br>" + auc[3] + ": " + auc[10] + " ETH";
 		    auctionSection.innerHTML = res;
@@ -50,16 +51,15 @@ function updateAuctions() {
 }
 
 function createAsset() {
-    var sn = SampleName.deployed();
     var recordId = document.getElementById("nameToReserve").value;
 
   setStatus("Initiating transaction... (please wait)");
 
-  sn.addRecord(recordId, account, recordId, account, {from: account}).then(function(txnId) {
+  sampleNameContract.addRecord(recordId, account, recordId, account, {from: account}).then(function(txnId) {
       console.log("Transaction id is : " + txnId);
       setStatus("Transaction complete!");
 
-      sn.owner.call(recordId).then(function(res) {
+      sampleNameContract.owner.call(recordId).then(function(res) {
 	  if (res === account) {
 	      setStatus("You are the proud owner of the name: " + recordId);
 	  } else {
@@ -73,14 +73,12 @@ function createAsset() {
 };
 
 function createAuction() {
-    var sn = SampleName.deployed();
-    var ah = AuctionHouse.deployed();
     var marketer = "0x536d6b87f21d8bbf23dd7f33fc3ca90e85cba0b6";
 
     setAuctionStatus("Initiating auction, please wait.");
 
     var recordId = document.getElementById("nameToAuction").value;
-    sn.owner.call(recordId).then(function(res) {
+    sampleNameContract.owner.call(recordId).then(function(res) {
 	if (!(res === account)) {
 	    setAuctionStatus("Looks like you don't own that name");
 	    return;
@@ -92,9 +90,9 @@ function createAuction() {
 	console.log("Prices, starting/reserve " + startingPrice + "/" + reservePrice);
 	console.log("Marketer is: " + marketer);
 
-	ah.createAuction(recordId,
+	auctionHouseContract.createAuction(recordId,
 			 "Auction for this unique name!",
-			 sn.address,
+			 sampleNameContract.address,
 			 recordId,
 			 deadline,
 			 startingPrice,
@@ -110,31 +108,41 @@ function createAuction() {
 };
 
 window.onload = function() {
-  web3.eth.getAccounts(function(err, accs) {
-    if (err != null) {
-      alert("There was an error fetching your accounts.");
-      return;
+  getContractAddress(function(ah_addr, sn_addr, error) {
+    if (error != null) {
+      setStatus("Cannot find network");
+      console.log(error);
+      throw "Cannot load contract address";
     }
 
-    if (accs.length == 0) {
-      alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
-      return;
-    }
+    auctionHouseContract = AuctionHouse.at(ah_addr);
+    sampleNameContract = SampleName.at(sn_addr);
 
-      accounts = accs;
-      account = accounts[0];
+    web3.eth.getAccounts(function(err, accs) {
+      if (err != null) {
+        alert("There was an error fetching your accounts.");
+        return;
+      }
 
-      updateAddress();
-      updateNetwork();
-      updateAuctions();
-      updateBlockNumber();
-      watchEvents();
+      if (accs.length == 0) {
+        alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
+        return;
+      }
+
+        accounts = accs;
+        account = accounts[0];
+
+        updateAddress();
+        updateNetwork();
+        updateAuctions();
+        updateBlockNumber();
+        watchEvents();
+    });
   });
 }
 
 function watchEvents() {
-    var ah = AuctionHouse.deployed();
-    var events = ah.allEvents();
+    var events = auctionHouseContract.allEvents();
 
     events.watch(function(err, msg) {
   if(err) {

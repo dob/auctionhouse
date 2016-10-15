@@ -30,7 +30,6 @@ function updateNetwork() {
 
 function refreshAuction() {
     var auctionId = getParameterByName("auctionId");
-    var ah = AuctionHouse.deployed();
     auction = {"auctionId": auctionId};
 
     auctionHouseContract.getAuctionCount.call().then(function(auctionCount) {
@@ -42,7 +41,7 @@ function refreshAuction() {
       }
     });
 
-    ah.getStatus.call(auctionId).then(function(auctionStatus) {
+    auctionHouseContract.getStatus.call(auctionId).then(function(auctionStatus) {
       // console.log("status:" + auctionStatus);
       if (auctionStatus == 0) {
         auction["status"] = "Pending";
@@ -55,7 +54,7 @@ function refreshAuction() {
         // console.log("Unknown status: " + auctionStatus);
       }
 
-      ah.getAuction.call(auctionId).then(function(result) {
+      auctionHouseContract.getAuction.call(auctionId).then(function(result) {
         auction["seller"] = result[0];
         auction["contractAddress"] = result[1];
         auction["recordId"] = result[2];
@@ -94,7 +93,7 @@ function activateAuction() {
     console.log("set owner transaction: " + txnId);
     //Activate the auction
     auctionHouseContract.activateAuction(auction["auctionId"], {from: account, gas: 500000}).then(function(txnId) {
-      console.log(txnId);
+      console.log("activate auction txnId" + txnId);
       refreshAuction();
     });
   });
@@ -170,30 +169,40 @@ function constructAuctionView(auction) {
 
 
 window.onload = function() {
-  auctionHouseContract = AuctionHouse.deployed();
-
   $("#header").load("header.html"); 
 
-  web3.eth.getAccounts(function(err, accs) {
-    if (err != null) {
-      alert("There was an error fetching your accounts.");
-      return;
+  getContractAddress(function(ah_addr, sn_addr, error) {
+    if (error != null) {
+      setStatus("Cannot find network");
+      console.log(error);
+      throw "Cannot load contract address";
     }
+    auctionHouseContract = AuctionHouse.at(ah_addr);
 
-    if (accs.length == 0) {
-      alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
-      return;
-    }
+    web3.eth.getAccounts(function(err, accs) {
+      if (err != null) {
+        console.log("There was an error fetching your accounts.");
+        return;
+      }
 
-      accounts = accs;
-      account = accounts[0];
+      if (accs.length == 0) {
+        console.log("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
+        return;
+      }
 
-      updateAddress();
-      refreshAuction();
-      updateBlockNumber();
-      updateNetwork();
-      watchEvents();
+        accounts = accs;
+        account = accounts[0];
+
+        updateAddress();
+        refreshAuction();
+        updateBlockNumber();
+        updateNetwork();
+        watchEvents();
+    });
+
   });
+
+
 }
 
 function getParameterByName(name, url) {
@@ -208,8 +217,7 @@ function getParameterByName(name, url) {
 
 
 function watchEvents() {
-    var ah = AuctionHouse.deployed();
-    var events = ah.allEvents();
+    var events = auctionHouseContract.allEvents();
 
     events.watch(function(err, msg) {
       if(err) {

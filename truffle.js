@@ -9,6 +9,9 @@ module.exports = {
     "app.js": [
       "javascripts/app.js",
     ],
+    "network.js": [
+      "javascripts/network.js"
+    ],
     "auction.js": [
       "javascripts/auction.js"
     ],
@@ -33,5 +36,16 @@ module.exports = {
     host: "localhost",
     // port: 8081
     port: 8545
+  },
+  networs: {
+    "development": {
+      network_id: "default"
+    },
+    "modern": {
+      network_id: 2
+    },
+    "live": {
+      network_id: 1
+    }
   }
 };

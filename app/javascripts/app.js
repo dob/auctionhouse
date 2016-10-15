@@ -1,6 +1,8 @@
 var accounts;
 var account;
 var auctions;
+var auctionHouseContract;
+
 
 function setStatus(message) {
   var status = document.getElementById("statusMessage");
@@ -20,18 +22,17 @@ function updateAddress() {
 function updateNetwork() {
     var network = document.getElementById("network");
     var provider = web3.version.getNetwork(function(err, net) {
-	network.innerHTML = net;
+    	network.innerHTML = net;
     });
 }
 
 function updateAuctions() {
     var auctionSection = document.getElementById("userAuctions");
-    var ah = AuctionHouse.deployed();
     var res = "";
 
     setStatus("Auctions being fetched...");
 
-    ah.getAuctionCount.call().then(function(count) {
+    auctionHouseContract.getAuctionCount.call().then(function(count) {
 	console.log("Contract has this many auctions " + count);
 
 	if (count <= 0) {
@@ -41,7 +42,7 @@ function updateAuctions() {
 	var aucs = [];
 	
 	for (var i = 0; i < count; i++) {
-	    ah.getAuction.call(i).then(function(auction) {
+	    auctionHouseContract.getAuction.call(i).then(function(auction) {
 		// Wrapping in a function because I need to access i
 		aucs.push(auction);
 
@@ -64,24 +65,35 @@ function updateAuctions() {
 }
 
 window.onload = function() {
-    web3.eth.getAccounts(function(err, accs) {
-	if (err != null) {
-	    alert("There was an error fetching your accounts.");
-	    return;
-	}
+    getContractAddress(function(ah_addr, sn_addr, error) {
+        if (error != null) {
+          setStatus("Cannot find network");
+          console.log(error);
+          throw "Cannot load contract address";
+        }
 
-	if (accs.length == 0) {
-	    alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
-	    return;
-	}
+        auctionHouseContract = AuctionHouse.at(ah_addr);
 
-	accounts = accs;
-	account = accounts[0];
+        web3.eth.getAccounts(function(err, accs) {
+        if (err != null) {
+            alert("There was an error fetching your accounts.");
+            return;
+        }
 
-	updateAddress();
-	updateAuctions();
+        if (accs.length == 0) {
+            alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
+            return;
+        }
+
+        accounts = accs;
+        account = accounts[0];
+
+        updateAddress();
+        updateAuctions();
+        });
+
+        updateNetwork();
+
     });
-
-    updateNetwork();
 }
 
