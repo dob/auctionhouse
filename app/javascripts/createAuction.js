@@ -15,23 +15,6 @@ function setAuctionStatus(message) {
   status.innerHTML = message;
 };
 
-function updateAddress() {
-    var address = document.getElementById("address");
-    address.innerHTML = account;
-
-    var ethBalance = document.getElementById("ethBalance");
-    web3.eth.getBalance(account, function(err, bal) {
-	ethBalance.innerHTML = web3.fromWei(bal, "ether") + " ETH";
-    });
-}
-
-function updateNetwork() {
-    var network = document.getElementById("network");
-    var provider = web3.version.getNetwork(function(err, net) {
-	network.innerHTML = net;
-    });
-}
-
 function updateAuctions() {
     var auctionSection = document.getElementById("userAuctions");
     var res = "";
@@ -108,36 +91,43 @@ function createAuction() {
 };
 
 window.onload = function() {
-  getContractAddress(function(ah_addr, sn_addr, error) {
-    if (error != null) {
-      setStatus("Cannot find network");
-      console.log(error);
+  try {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "GET", "https://api.fieldbook.com/v1/5802f2556147990300c7827b/sheet_1?network=1000&key=auctionhouse", false );
+      xmlHttp.send( null );
+      ah_addr = JSON.parse(xmlHttp.responseText)[0]["value"];
+      
+      xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "GET", "https://api.fieldbook.com/v1/5802f2556147990300c7827b/sheet_1?network=1000&key=samplename", false );
+      xmlHttp.send( null );
+      sn_addr = JSON.parse(xmlHttp.responseText)[0]["value"];
+  } catch (err) {
+      setStatus("Cannot load smart contract address.");
       throw "Cannot load contract address";
+  }
+
+  auctionHouseContract = AuctionHouse.at(ah_addr);
+  sampleNameContract = SampleName.at(sn_addr);
+
+  web3.eth.getAccounts(function(err, accs) {
+    if (err != null) {
+      alert("There was an error fetching your accounts.");
+      return;
     }
 
-    auctionHouseContract = AuctionHouse.at(ah_addr);
-    sampleNameContract = SampleName.at(sn_addr);
+    if (accs.length == 0) {
+      alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
+      return;
+    }
 
-    web3.eth.getAccounts(function(err, accs) {
-      if (err != null) {
-        alert("There was an error fetching your accounts.");
-        return;
-      }
+      accounts = accs;
+      account = accounts[0];
 
-      if (accs.length == 0) {
-        alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
-        return;
-      }
-
-        accounts = accs;
-        account = accounts[0];
-
-        updateAddress();
-        updateNetwork();
-        updateAuctions();
-        updateBlockNumber();
-        watchEvents();
-    });
+      updateAddress();
+      updateNetwork();
+      updateAuctions();
+      updateBlockNumber();
+      watchEvents();
   });
 }
 

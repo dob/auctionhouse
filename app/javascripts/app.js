@@ -22,7 +22,13 @@ function updateAddress() {
 function updateNetwork() {
     var network = document.getElementById("network");
     var provider = web3.version.getNetwork(function(err, net) {
-    	network.innerHTML = net;
+        if (net == "1") {
+            network.innerHTML = "Mainnet";
+        } else if (net == "2") {
+            network.innerHTML = "Testnet (modern)";
+        } else {
+            network.innerHTML = net;
+        }
     });
 }
 
@@ -90,10 +96,8 @@ window.onload = function() {
 
         updateAddress();
         updateAuctions();
-        });
-
         updateNetwork();
-
+        });
     });
 }
 

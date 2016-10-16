@@ -10,24 +10,6 @@ function setStatus(message) {
   status.innerHTML = message;
 };
 
-function updateAddress() {
-    var address = document.getElementById("address");
-    address.innerHTML = account;
-
-    var ethBalance = document.getElementById("ethBalance");
-    web3.eth.getBalance(account, function(err, bal) {
-	ethBalance.innerHTML = web3.fromWei(bal, "ether") + " ETH";
-    });
-}
-
-function updateNetwork() {
-    var network = document.getElementById("network");
-    var provider = web3.version.getNetwork(function(err, net) {
-	network.innerHTML = net;
-    });
-}
-
-
 function refreshAuction() {
     var auctionId = getParameterByName("auctionId");
     auction = {"auctionId": auctionId};
