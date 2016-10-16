@@ -42,7 +42,8 @@ module.exports = {
       network_id: "default"
     },
     "modern": {
-      network_id: 2
+      network_id: 2,
+      gas: 500000
     },
     "live": {
       network_id: 1
