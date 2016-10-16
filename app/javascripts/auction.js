@@ -2,13 +2,14 @@ var accounts;
 var account;
 var auctions;
 var auctionHouseContract;
+var sampleNameContract;
 var auction;
 var currentBlockNumber;
 
-function setStatus(message) {
-  var status = document.getElementById("statusMessage");
-  status.innerHTML = message;
-};
+// function setStatus(message) {
+//   var status = document.getElementById("statusMessage");
+//   status.innerHTML = message;
+// };
 
 function refreshAuction() {
     var auctionId = getParameterByName("auctionId");
@@ -63,19 +64,28 @@ function refreshAuction() {
 // function activateAuction(auctionId, recordId) {
 function activateAuction() {
   if (!isOwner()) {
-    setStatus("Only seller can activate auction.");
+    setErrorMsg("Only seller can activate auction.");
   }
 
   //Transfer ownership to the contract
-  var sn = SampleName.deployed();
+  // var sn = SampleName.deployed();
   console.log(auction["recordId"]);
   console.log(auctionHouseContract.address);
 
-  sn.setOwner(auction["recordId"], auctionHouseContract.address, {from: account, gas: 500000}).then(function(txnId) {
+  setStatus("Transfering ownership to the contract...");
+  showSpinner();
+  sampleNameContract.setOwner(auction["recordId"], auctionHouseContract.address, {from: account, gas: 500000}).then(function(txnId) {
     console.log("set owner transaction: " + txnId);
+    setConfirmationMsg("Ownership transfer complete!");
+    hideSpinner();
+
     //Activate the auction
+    setStatus("Activating auction...");
+    showSpinner();
     auctionHouseContract.activateAuction(auction["auctionId"], {from: account, gas: 500000}).then(function(txnId) {
       console.log("activate auction txnId" + txnId);
+      setConfirmationMsg("Auction activated!");
+      hideSpinner();
       refreshAuction();
     });
   });
@@ -86,33 +96,41 @@ function placeBid() {
     bid = web3.toWei(bid, "ether");
 
     setStatus("Bid is being placed, hang tight...")
+    showSpinner();
 
     if (bid < auction["currentBid"]) {
-    	setStatus("Bid has to be at least " + web3.fromWei(auction["currentBid"], "ether"));
+    	setErrorMsg("Bid has to be at least " + web3.fromWei(auction["currentBid"], "ether"));
+      hideSpinner();
     	return;
     }
 
-    console.log({from:account, value:bid, gas: 1400000});
-
     var gas = 1400000;
     auctionHouseContract.placeBid(auction["auctionId"], {from:account, value:bid, gas: gas}).then(function(txnId) {
-	console.log("Bid txnId: " + txnId);
-	web3.eth.getTransactionReceipt(txnId, function(err, txnReceipt) {
-	    if (txnReceipt.gasUsed == gas) {
-		console.log("We had a failed bid " + txnReceipt);
-		setStatus("Bid failed");
-	    } else {
-		console.log("We had a successful bid " + txnReceipt);
-		setStatus("Bid succeeded!");
-	    }
-	});
-	refreshAuction();
+    	console.log("Bid txnId: " + txnId);
+
+    	web3.eth.getTransactionReceipt(txnId, function(err, txnReceipt) {
+    	  if (txnReceipt.gasUsed == gas) {
+      		console.log("We had a failed bid " + txnReceipt);
+      		setErrorMsg("Bid failed");
+          hideSpinner();
+    	  } else {
+      		console.log("We had a successful bid " + txnReceipt);
+      		setConfirmationMsg("Bid succeeded!");
+          hideSpinner();
+    	  }
+  	  });
+
+  	  refreshAuction();
     });
 }
 
 function endAuction() {
+  setStatus("Ending auction...");
+  showSpinner();
   auctionHouseContract.endAuction(auction["auctionId"], {from:account, gas: 1400000}).then(function(txnId) {
     console.log("End auction txnId: " + txnId)
+    setConfirmationMsg("Auction ended successfully.");
+    hideSpinner();
     refreshAuction();
   });
 }
@@ -155,13 +173,16 @@ window.onload = function() {
 
   getContractAddress(function(ah_addr, sn_addr, error) {
     if (error != null) {
-      setStatus("Cannot find network");
+      setErrorMsg("Cannot find network");
       console.log(error);
       throw "Cannot load contract address";
     }
+
     auctionHouseContract = AuctionHouse.at(ah_addr);
+    sampleNameContract = SampleName.at(sn_addr);
 
     web3.eth.getAccounts(function(err, accs) {
+
       if (err != null) {
         console.log("There was an error fetching your accounts.");
         return;

@@ -5,15 +5,10 @@ var currentBlockNumber;
 var auctionHouseContract;
 var sampleNameContract;
 
-function setStatus(message) {
-  var status = document.getElementById("statusMessage");
-  status.innerHTML = message;
-};
-
-function setAuctionStatus(message) {
-  var status = document.getElementById("auctionstatus");
-  status.innerHTML = message;
-};
+// function setAuctionStatus(message) {
+//   var status = document.getElementById("auctionstatus");
+//   status.innerHTML = message;
+// };
 
 function updateAuctions() {
     var auctionSection = document.getElementById("userAuctions");
@@ -37,33 +32,39 @@ function createAsset() {
     var recordId = document.getElementById("nameToReserve").value;
 
   setStatus("Initiating transaction... (please wait)");
+  showSpinner();
 
   sampleNameContract.addRecord(recordId, account, recordId, account, {from: account}).then(function(txnId) {
       console.log("Transaction id is : " + txnId);
-      setStatus("Transaction complete!");
+      setConfirmationMsg("Transaction complete!");
+      hideSpinner();
 
       sampleNameContract.owner.call(recordId).then(function(res) {
 	  if (res === account) {
-	      setStatus("You are the proud owner of the name: " + recordId);
+	      setConfirmationMsg("You are the proud owner of the name: " + recordId);
 	  } else {
-	      setStatus("It looks like the owner of that name is: " + res);
+	    setErrorMsg("It looks like the owner of that name is: " + res);
+      hideSpinner();
 	  }
       });
   }).catch(function(e) {
     console.log(e);
-    setStatus("Error registering name. See log.");
+    setErrorMsg("Error registering name. See log.");
+    hideSpinner();
   });
 };
 
 function createAuction() {
     var marketer = "0x536d6b87f21d8bbf23dd7f33fc3ca90e85cba0b6";
 
-    setAuctionStatus("Initiating auction, please wait.");
+    setStatus("Initiating auction, please wait.");
+    showSpinner();
 
     var recordId = document.getElementById("nameToAuction").value;
     sampleNameContract.owner.call(recordId).then(function(res) {
 	if (!(res === account)) {
-	    setAuctionStatus("Looks like you don't own that name");
+	    setErrorMsg("Looks like you don't own that name");
+      hideSpinner();
 	    return;
 	}
 	var startingPrice = web3.toWei(parseFloat(document.getElementById("startingPrice").value), "ether");
@@ -84,7 +85,8 @@ function createAuction() {
 			 marketer,
 			 {from: account, gas:500000}).then(function(txId) {
 
-			     setAuctionStatus("Auction created in transaction: " + txId);
+			     setConfirmationMsg("Auction created in transaction: " + txId);
+           hideSpinner();
 			     updateAuctions();
 			 });
     });
@@ -102,7 +104,7 @@ window.onload = function() {
       xmlHttp.send( null );
       sn_addr = JSON.parse(xmlHttp.responseText)[0]["value"];
   } catch (err) {
-      setStatus("Cannot load smart contract address.");
+      setErrorMsg("Cannot load smart contract address.");
       throw "Cannot load contract address";
   }
 

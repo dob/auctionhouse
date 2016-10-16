@@ -7,7 +7,28 @@ var auctionHouseContract;
 function setStatus(message) {
   var status = document.getElementById("statusMessage");
   status.innerHTML = message;
+  status.style.color = "#333";
 };
+
+function setConfirmationMsg(message) {
+  var status = document.getElementById("statusMessage");
+  status.innerHTML = message;
+  status.style.color = "#3c763d";
+}
+
+function setErrorMsg(message) {
+  var status = document.getElementById("statusMessage");
+  status.innerHTML = message;
+  status.style.color = "#F08080";
+}
+
+function showSpinner() {
+    document.getElementById("spinner").style.display = "inline";
+}
+
+function hideSpinner() {
+    document.getElementById("spinner").style.display = "none";
+}
 
 function updateAddress() {
     var address = document.getElementById("address");
