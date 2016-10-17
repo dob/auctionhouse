@@ -2,40 +2,18 @@ var accounts;
 var account;
 var auctions;
 
-function setStatus(message) {
-  var status = document.getElementById("statusMessage");
-  status.innerHTML = message;
-};
-
-function updateAddress() {
-    var address = document.getElementById("address");
-    address.innerHTML = account;
-
-    var ethBalance = document.getElementById("ethBalance");
-    web3.eth.getBalance(account, function(err, bal) {
-	ethBalance.innerHTML = web3.fromWei(bal, "ether") + " ETH";
-    });
-}
-
-function updateNetwork() {
-    var network = document.getElementById("network");
-    var provider = web3.version.getNetwork(function(err, net) {
-	network.innerHTML = net;
-    });
-}
-
 function updateAuctions() {
     var auctionSection = document.getElementById("userAuctions");
     var ah = AuctionHouse.deployed();
     var res = "";
 
-    setStatus("Auctions being fetched...");
+    setStatus("Auctions being fetched...", "warning");
 
     ah.getAuctionCount.call().then(function(count) {
 	console.log("Contract has this many auctions " + count);
 
 	if (count <= 0) {
-	    setStatus("No auctions found");
+	    setStatus("No auctions found", "error");
 	}
 
 	var aucs = [];
@@ -64,6 +42,8 @@ function updateAuctions() {
 }
 
 window.onload = function() {
+    $("#right-column").load("rightPanel.html");
+    
     web3.eth.getAccounts(function(err, accs) {
 	if (err != null) {
 	    alert("There was an error fetching your accounts.");
@@ -78,10 +58,8 @@ window.onload = function() {
 	accounts = accs;
 	account = accounts[0];
 
-	updateAddress();
+	updateEthNetworkInfo();
 	updateAuctions();
     });
-
-    updateNetwork();
 }
 

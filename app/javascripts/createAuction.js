@@ -3,32 +3,10 @@ var account;
 var auctions;
 var currentBlockNumber;
 
-function setStatus(message) {
-  var status = document.getElementById("statusMessage");
-  status.innerHTML = message;
-};
-
 function setAuctionStatus(message) {
   var status = document.getElementById("auctionstatus");
   status.innerHTML = message;
 };
-
-function updateAddress() {
-    var address = document.getElementById("address");
-    address.innerHTML = account;
-
-    var ethBalance = document.getElementById("ethBalance");
-    web3.eth.getBalance(account, function(err, bal) {
-	ethBalance.innerHTML = web3.fromWei(bal, "ether") + " ETH";
-    });
-}
-
-function updateNetwork() {
-    var network = document.getElementById("network");
-    var provider = web3.version.getNetwork(function(err, net) {
-	network.innerHTML = net;
-    });
-}
 
 function updateAuctions() {
     var auctionSection = document.getElementById("userAuctions");
@@ -41,7 +19,8 @@ function updateAuctions() {
 	    ah.getAuctionIdForUserAndIdx.call(account, i).then(function(idx) {
 		ah.getAuction.call(idx).then(function(auc) {
 		    console.log("Found an auction: " + auc[3]);
-		    res = res + "<br>" + auc[3] + ": " + auc[10] + " ETH";
+		    var bidAmount = web3.fromWei(auc[10], "ether");
+		    res = res + "<br>" + auc[3] + ": " + bidAmount + " ETH";
 		    auctionSection.innerHTML = res;
 		});
 	    });
@@ -110,6 +89,8 @@ function createAuction() {
 };
 
 window.onload = function() {
+    $("#right-column").load("rightPanel.html");
+    
   web3.eth.getAccounts(function(err, accs) {
     if (err != null) {
       alert("There was an error fetching your accounts.");
@@ -124,8 +105,7 @@ window.onload = function() {
       accounts = accs;
       account = accounts[0];
 
-      updateAddress();
-      updateNetwork();
+      updateEthNetworkInfo();
       updateAuctions();
       updateBlockNumber();
       watchEvents();
@@ -137,23 +117,23 @@ function watchEvents() {
     var events = ah.allEvents();
 
     events.watch(function(err, msg) {
-  if(err) {
-      console.log("Error: " + err);
-  } else { 
-      console.log("Got an event: " + msg.event);
-  }
+	if(err) {
+	    console.log("Error: " + err);
+	} else { 
+	    console.log("Got an event: " + msg.event);
+	}
     });
 
     var filter = web3.eth.filter("latest");
     filter.watch(function(err, block) {
-  // Call get block number on every block
-  updateBlockNumber();
+	// Call get block number on every block
+	updateBlockNumber();
     });
 }
 
 function updateBlockNumber() {
     web3.eth.getBlockNumber(function(err, blockNumber) {
-  currentBlockNumber = blockNumber;
-  console.log("Current block number is: " + blockNumber);
+	currentBlockNumber = blockNumber;
+	console.log("Current block number is: " + blockNumber);
     });
 }

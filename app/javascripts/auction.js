@@ -5,27 +5,7 @@ var auctionHouseContract;
 var auction;
 var currentBlockNumber;
 
-function setStatus(message) {
-  var status = document.getElementById("statusMessage");
-  status.innerHTML = message;
-};
-
-function updateAddress() {
-    var address = document.getElementById("address");
-    address.innerHTML = account;
-
-    var ethBalance = document.getElementById("ethBalance");
-    web3.eth.getBalance(account, function(err, bal) {
-	ethBalance.innerHTML = web3.fromWei(bal, "ether") + " ETH";
-    });
-}
-
-function updateNetwork() {
-    var network = document.getElementById("network");
-    var provider = web3.version.getNetwork(function(err, net) {
-	network.innerHTML = net;
-    });
-}
+var infoBoxHTMLOwnerPending = "<p>Right now this auction is <b>pending</b>. If you're the owner you can click the activate button, which will initiate two ethereum transactions. The first will transfer ownership of your asset to the <a href='https://github.com/dob/auctionhouse/contracts/AuctionHouse.sol'>AuctionHouse contract</a>. The second will activate the auction.</p><p>Don't worry, if the auction doesn't succeed by the deadline, then ownership of your asset will be transfered back to you.</p>";
 
 
 function refreshAuction() {
@@ -36,7 +16,7 @@ function refreshAuction() {
     auctionHouseContract.getAuctionCount.call().then(function(auctionCount) {
       // console.log(auctionCount.toNumber());
       if (auctionCount.toNumber() < auctionId) {
-        setStatus("Cannot find auction: " + auctionId);
+          setStatus("Cannot find auction: " + auctionId, "error");
         throw new Error();
         //Redirect to 404 page
       }
@@ -76,13 +56,12 @@ function refreshAuction() {
       });
 
     });
-
 }
 
 // function activateAuction(auctionId, recordId) {
 function activateAuction() {
   if (!isOwner()) {
-    setStatus("Only seller can activate auction.");
+      setStatus("Only seller can activate auction.", "error");
   }
 
   //Transfer ownership to the contract
@@ -104,10 +83,10 @@ function placeBid() {
     var bid = document.getElementById("bid_value").value;
     bid = web3.toWei(bid, "ether");
 
-    setStatus("Bid is being placed, hang tight...")
+    setStatus("Bid is being placed, hang tight...", "warning");
 
     if (bid < auction["currentBid"]) {
-	setStatus("Bid has to be at least " + auction["currentBid"]);
+	setStatus("Bid has to be at least " + auction["currentBid"], "error");
 	return;
     }
 
@@ -119,10 +98,10 @@ function placeBid() {
 	web3.eth.getTransactionReceipt(txnId, function(err, txnReceipt) {
 	    if (txnReceipt.gasUsed == gas) {
 		console.log("We had a failed bid " + txnReceipt);
-		setStatus("Bid failed");
+		setStatus("Bid failed", "error");
 	    } else {
 		console.log("We had a successful bid " + txnReceipt);
-		setStatus("Bid succeeded!");
+		setStatus("Bid succeeded!", "success");
 	    }
 	});
 	refreshAuction();
@@ -147,7 +126,7 @@ function constructAuctionView(auction) {
   result += "<div id='description'>Description: " + auction["description"] + "</div>";
     result += "<div id='currentBid'>Current Bid: " + web3.fromWei(auction["currentBid"], "ether") + " ETH</div>";
   result += "<div id='bidCount'>Number of Bids: " + auction["bidCount"] + "</div>";
-  result += "<div id='deadline'>Deadline Block Number: " + auction["blockNumberOfDeadline"] + "</div>";
+  result += "<div id='deadline'>Deadline Block Number: " + auction["blockNumberOfDeadline"] + " <span id='deadlineCountdown'></span></div>";
 
   //Activate auction button
   if (auction["status"] == "Pending" && isOwner()) {
@@ -172,7 +151,10 @@ function constructAuctionView(auction) {
 window.onload = function() {
   auctionHouseContract = AuctionHouse.deployed();
 
-  $("#header").load("header.html"); 
+    $("#header").load("header.html");
+    $("#right-column").load("rightPanel.html", function() {
+	updateInfoBox(infoBoxHTMLOwnerPending);
+    });
 
   web3.eth.getAccounts(function(err, accs) {
     if (err != null) {
@@ -188,12 +170,13 @@ window.onload = function() {
       accounts = accs;
       account = accounts[0];
 
-      updateAddress();
+      updateEthNetworkInfo();
       refreshAuction();
       updateBlockNumber();
-      updateNetwork();
+
       watchEvents();
   });
+
 }
 
 function getParameterByName(name, url) {
@@ -226,10 +209,19 @@ function watchEvents() {
     });
 }
 
-
 function updateBlockNumber() {
     web3.eth.getBlockNumber(function(err, blockNumber) {
-  currentBlockNumber = blockNumber;
-  console.log("Current block number is: " + blockNumber);
+	currentBlockNumber = blockNumber;
+	console.log("Block number is : " + blockNumber);
+	console.log("auction is: " + auction);
+
+	if (auction != null) {
+	    var blocksLeft = auction['blockNumberOfDeadline'] - currentBlockNumber;
+
+	    if (blocksLeft > 0) {
+		var minsLeft = blocksLeft * 12.5 / 60;  // About 12 second block times
+		$("span#deadlineCountdown").text("(" + blocksLeft + " blocks, and " + minsLeft + "minutes from now)");
+	    }
+	}
     });
 }

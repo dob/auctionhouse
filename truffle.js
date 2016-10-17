@@ -3,17 +3,24 @@ module.exports = {
     "index.html": "index.html",
     "auction.html": "auction.html",
     "header.html": "header.html",
-    "footer.html": "footer.html",
+      "footer.html": "footer.html",
+      "rightPanel.html": "rightPanel.html",
     "createAuction.html": "createAuction.html",
     "about.html": "about.html",
     "app.js": [
       "javascripts/app.js",
+    ],
+    "auctionhouse.js": [
+      "javascripts/auctionhouse.js"
     ],
     "auction.js": [
       "javascripts/auction.js"
     ],
     "createAuction.js": [
       "javascripts/createAuction.js"
+    ],
+    "jquery.min.js": [
+      "javascripts/jquery.min.js"
     ],
     "bootstrap.min.js": [
       "javascripts/bootstrap.min.js"
