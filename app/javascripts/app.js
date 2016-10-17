@@ -1,15 +1,15 @@
 var accounts;
 var account;
 var auctions;
+var auctionHouseContract;
 
 function updateAuctions() {
     var auctionSection = document.getElementById("userAuctions");
-    var ah = AuctionHouse.deployed();
     var res = "";
 
     setStatus("Auctions being fetched...", "warning");
 
-    ah.getAuctionCount.call().then(function(count) {
+    auctionHouseContract.getAuctionCount.call().then(function(count) {
 	console.log("Contract has this many auctions " + count);
 
 	if (count <= 0) {
@@ -19,7 +19,7 @@ function updateAuctions() {
 	var aucs = [];
 	
 	for (var i = 0; i < count; i++) {
-	    ah.getAuction.call(i).then(function(auction) {
+	    auctionHouseContract.getAuction.call(i).then(function(auction) {
 		// Wrapping in a function because I need to access i
 		aucs.push(auction);
 
@@ -44,22 +44,26 @@ function updateAuctions() {
 window.onload = function() {
     $("#right-column").load("rightPanel.html");
     
-    web3.eth.getAccounts(function(err, accs) {
-	if (err != null) {
-	    alert("There was an error fetching your accounts.");
-	    return;
-	}
+    getContractAddress(function(ah_addr, sn_addr, error) {
+        if (error != null) {
+            setStatus("Cannot find network");
+            console.log(error);
+            throw "Cannot load contract address";
+        }
 
-	if (accs.length == 0) {
-	    alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
-	    return;
-	}
+        auctionHouseContract = AuctionHouse.at(ah_addr);
 
-	accounts = accs;
-	account = accounts[0];
+        web3.eth.getAccounts(function(err, accs) {
+            if (err != null) {
+		alert("There was an error fetching your accounts.");
+		return;
+            }
+	    accounts = accs;
+	    account = accounts[0];
 
-	updateEthNetworkInfo();
-	updateAuctions();
+	    updateEthNetworkInfo();
+	    updateAuctions();
+	});
     });
 }
 

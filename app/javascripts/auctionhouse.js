@@ -36,5 +36,12 @@ function updateInfoBox(html) {
     infoBox.innerHTML = html;
 }
 
+function hideSpinner() {
+    $("#spinner").hide();
+}
+
+function showSpinner() {
+    $("#spinner").show();
+}
 
 

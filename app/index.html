@@ -8,10 +8,9 @@
 
     <title>AuctionHouse Dapp</title>
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-
         <!-- Bootstrap -->
-    <link href="bootstrap.min.css" rel="stylesheet">
-    <link href="bootstrap-theme.min.css" rel="stylesheet">
+    <link href="./bootstrap.min.css" rel="stylesheet">
+    <link href="./bootstrap-theme.min.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -23,6 +22,9 @@
     <link href="app.css" rel='stylesheet' type='text/css'>
     <script src="auctionhouse.js"></script>
     <script src="app.js"></script>
+    <link href="./app.css" rel='stylesheet' type='text/css'>
+    <script src="./network.js"></script>
+    <script src="./app.js"></script>
   </head>
   <body>
 
@@ -95,32 +97,7 @@
 		    <th>Ending Block</th>
 		  </tr>
 		</thead>
-		<tbody id="userAuctions">
-		  <tr>
-		    <td><a href="auction.html?auctionId=0">longauction.eth</a></td>
-		    <td>1.4 ETH</td>
-		    <td>3</td>
-		    <td>17940</td>
-		  </tr>
-		  <tr>
-		    <td><a href="auction.html?auctionId=0">metamask.eth</a></td>
-		    <td>3.0 ETH</td>
-		    <td>1</td>
-		    <td>1940</td>
-		  </tr>
-		  <tr>
-		    <td><a href="auction.html?auctionId=0">dougwallet</a></td>
-		    <td>14.5656 ETH</td>
-		    <td>13</td>
-		    <td>10040</td>
-		  </tr>
-		  <tr>
-		    <td><a href="auction.html?auctionId=0">ericwallet.address</a></td>
-		    <td>3484 ETH</td>
-		    <td>128</td>
-		    <td>27940</td>
-		  </tr>
-		</tbody>
+		<tbody id="userAuctions"></tbody>
 	      </table>
 	  </div>
 	</div> <!-- The column of 8 -->

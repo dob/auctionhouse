@@ -2,15 +2,14 @@ var accounts;
 var account;
 var auctions;
 var auctionHouseContract;
+var sampleNameContract;
 var auction;
 var currentBlockNumber;
 
 var infoBoxHTMLOwnerPending = "<p>Right now this auction is <b>pending</b>. If you're the owner you can click the activate button, which will initiate two ethereum transactions. The first will transfer ownership of your asset to the <a href='https://github.com/dob/auctionhouse/contracts/AuctionHouse.sol'>AuctionHouse contract</a>. The second will activate the auction.</p><p>Don't worry, if the auction doesn't succeed by the deadline, then ownership of your asset will be transfered back to you.</p>";
 
-
 function refreshAuction() {
     var auctionId = getParameterByName("auctionId");
-    var ah = AuctionHouse.deployed();
     auction = {"auctionId": auctionId};
 
     auctionHouseContract.getAuctionCount.call().then(function(auctionCount) {
@@ -22,7 +21,7 @@ function refreshAuction() {
       }
     });
 
-    ah.getStatus.call(auctionId).then(function(auctionStatus) {
+    auctionHouseContract.getStatus.call(auctionId).then(function(auctionStatus) {
       // console.log("status:" + auctionStatus);
       if (auctionStatus == 0) {
         auction["status"] = "Pending";
@@ -35,7 +34,7 @@ function refreshAuction() {
         // console.log("Unknown status: " + auctionStatus);
       }
 
-      ah.getAuction.call(auctionId).then(function(result) {
+      auctionHouseContract.getAuction.call(auctionId).then(function(result) {
         auction["seller"] = result[0];
         auction["contractAddress"] = result[1];
         auction["recordId"] = result[2];
@@ -60,23 +59,32 @@ function refreshAuction() {
 
 // function activateAuction(auctionId, recordId) {
 function activateAuction() {
-  if (!isOwner()) {
-      setStatus("Only seller can activate auction.", "error");
-  }
+    if (!isOwner()) {
+	setStatus("Only seller can activate auction.", "error");
+    }
 
-  //Transfer ownership to the contract
-  var sn = SampleName.deployed();
-  console.log(auction["recordId"]);
-  console.log(auctionHouseContract.address);
+    //Transfer ownership to the contract
+    // var sn = SampleName.deployed();
+    console.log(auction["recordId"]);
+    console.log(auctionHouseContract.address);
 
-  sn.setOwner(auction["recordId"], auctionHouseContract.address, {from: account, gas: 500000}).then(function(txnId) {
-    console.log("set owner transaction: " + txnId);
-    //Activate the auction
-    auctionHouseContract.activateAuction(auction["auctionId"], {from: account, gas: 500000}).then(function(txnId) {
-      console.log(txnId);
-      refreshAuction();
+    setStatus("Transfering ownership to the contract...", "warning");
+    showSpinner();
+    sampleNameContract.setOwner(auction["recordId"], auctionHouseContract.address, {from: account, gas: 500000}).then(function(txnId) {
+	console.log("set owner transaction: " + txnId);
+	setStatus("Ownership transfer complete!");
+	hideSpinner();
+
+	//Activate the auction
+	setStatus("Activating auction...", "warning");
+	showSpinner();
+	auctionHouseContract.activateAuction(auction["auctionId"], {from: account, gas: 500000}).then(function(txnId) {
+	    console.log("activate auction txnId" + txnId);
+	    setStatus("Auction activated!");
+	    hideSpinner();
+	    refreshAuction();
+	});
     });
-  });
 }
 
 function placeBid() {
@@ -84,13 +92,12 @@ function placeBid() {
     bid = web3.toWei(bid, "ether");
 
     setStatus("Bid is being placed, hang tight...", "warning");
+    showSpinner();
 
     if (bid < auction["currentBid"]) {
 	setStatus("Bid has to be at least " + auction["currentBid"], "error");
 	return;
     }
-
-    console.log({from:account, value:bid, gas: 1400000});
 
     var gas = 1400000;
     auctionHouseContract.placeBid(auction["auctionId"], {from:account, value:bid, gas: gas}).then(function(txnId) {
@@ -99,9 +106,11 @@ function placeBid() {
 	    if (txnReceipt.gasUsed == gas) {
 		console.log("We had a failed bid " + txnReceipt);
 		setStatus("Bid failed", "error");
+		hideSpinner();
 	    } else {
 		console.log("We had a successful bid " + txnReceipt);
 		setStatus("Bid succeeded!", "success");
+		hideSpinner();
 	    }
 	});
 	refreshAuction();
@@ -109,8 +118,12 @@ function placeBid() {
 }
 
 function endAuction() {
+    setStatus("Ending auction...", "warning");
+  showSpinner();
   auctionHouseContract.endAuction(auction["auctionId"], {from:account, gas: 1400000}).then(function(txnId) {
     console.log("End auction txnId: " + txnId)
+    setStatus("Auction ended successfully.");
+    hideSpinner();
     refreshAuction();
   });
 }
@@ -149,34 +162,33 @@ function constructAuctionView(auction) {
 
 
 window.onload = function() {
-  auctionHouseContract = AuctionHouse.deployed();
-
     $("#header").load("header.html");
     $("#right-column").load("rightPanel.html", function() {
 	updateInfoBox(infoBoxHTMLOwnerPending);
     });
 
-  web3.eth.getAccounts(function(err, accs) {
-    if (err != null) {
-      alert("There was an error fetching your accounts.");
-      return;
-    }
+    getContractAddress(function(ah_addr, sn_addr, error) {
+	if (error != null) {
+	    setErrorMsg("Cannot find network");
+	    console.log(error);
+	    throw "Cannot load contract address";
+	}
 
-    if (accs.length == 0) {
-      alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
-      return;
-    }
+	auctionHouseContract = AuctionHouse.at(ah_addr);
+	sampleNameContract = SampleName.at(sn_addr);
 
-      accounts = accs;
-      account = accounts[0];
+	web3.eth.getAccounts(function(err, accs) {
 
-      updateEthNetworkInfo();
-      refreshAuction();
-      updateBlockNumber();
+	    accounts = accs;
+	    account = accounts[0];
 
-      watchEvents();
-  });
+	    updateEthNetworkInfo();
+	    refreshAuction();
+	    updateBlockNumber();
 
+	    watchEvents();
+	});
+    });
 }
 
 function getParameterByName(name, url) {
@@ -191,8 +203,7 @@ function getParameterByName(name, url) {
 
 
 function watchEvents() {
-    var ah = AuctionHouse.deployed();
-    var events = ah.allEvents();
+    var events = auctionHouseContract.allEvents();
 
     events.watch(function(err, msg) {
       if(err) {
