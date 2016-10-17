@@ -7,6 +7,10 @@ var currentBlockNumber;
 
 var infoBoxHTMLOwnerPending = "<p>Right now this auction is <b>pending</b>. If you're the owner you can click the activate button, which will initiate two ethereum transactions. The first will transfer ownership of your asset to the <a href='https://github.com/dob/auctionhouse/contracts/AuctionHouse.sol'>AuctionHouse contract</a>. The second will activate the auction.</p><p>Don't worry, if the auction doesn't succeed by the deadline, then ownership of your asset will be transfered back to you.</p>";
 
+var infoBoxHTMLActive = "<p>Right now this auction is <b>active</b>. You can place a bid, in ether, for this item if you are running <a href='http://metamask.io'>Metamask</a>. It will ask you to authorize your bid transaction, and the ether for your bid will be held by the <a href='https://github.com/dob/auctionhouse/contracts/AuctionHouse.sol'>AuctionHouse contract</a> until you either win the item, or until you are out bid. At that point your bid amount will be transfered back to you or your won item will be transfered to you by the contract.</p>";
+
+var infoBoxHTMLInactive = "<p>Right now this auction is either over, or was cancelled. You can not place a bid on this item at this point. Try browsing the other <a href='index.html#auctions'>currently active auctions</a>.</p>";
+
 
 function refreshAuction() {
     var auctionId = getParameterByName("auctionId");
@@ -14,51 +18,50 @@ function refreshAuction() {
     auction = {"auctionId": auctionId};
 
     auctionHouseContract.getAuctionCount.call().then(function(auctionCount) {
-      // console.log(auctionCount.toNumber());
-      if (auctionCount.toNumber() < auctionId) {
-          setStatus("Cannot find auction: " + auctionId, "error");
-        throw new Error();
-        //Redirect to 404 page
-      }
+	// console.log(auctionCount.toNumber());
+	if (auctionCount.toNumber() < auctionId) {
+            setStatus("Cannot find auction: " + auctionId, "error");
+            throw new Error();
+            //Redirect to 404 page
+	}
     });
 
     ah.getStatus.call(auctionId).then(function(auctionStatus) {
-      // console.log("status:" + auctionStatus);
-      if (auctionStatus == 0) {
-        auction["status"] = "Pending";
-      } else if (auctionStatus == 1) {
-        auction["status"] = "Active";
-      } else if (auctionStatus == 2) {
-        auction["status"] = "Inactive";
-      } else {
-        alert("Unknown status: " + auctionStatus);
-        // console.log("Unknown status: " + auctionStatus);
-      }
+	// console.log("status:" + auctionStatus);
+	if (auctionStatus == 0) {
+            auction["status"] = "Pending";
+	    updateInfoBox(infoBoxHTMLOwnerPending);
+	} else if (auctionStatus == 1) {
+            auction["status"] = "Active";
+	    updateInfoBox(infoBoxHTMLActive);
+	} else if (auctionStatus == 2) {
+            auction["status"] = "Inactive";
+  	    updateInfoBox(infoBoxHTMLInactive);
+	} else {
+            alert("Unknown status: " + auctionStatus);
+	}
 
-      ah.getAuction.call(auctionId).then(function(result) {
-        auction["seller"] = result[0];
-        auction["contractAddress"] = result[1];
-        auction["recordId"] = result[2];
-        auction["title"] = result[3];
-        auction["description"] = result[4];
-        auction["blockNumberOfDeadline"] = result[5].toNumber();
-        auction["distributionCut"] = result[6].toNumber();
-        auction["distributionAddress"] = result[7]
-        auction["startingPrice"] = result[8].toNumber();
-        auction["reservePrice"] = result[9].toNumber();
-        auction["currentBid"] = result[10].toNumber();
-        auction["bidCount"] = result[11].toNumber();
+	ah.getAuction.call(auctionId).then(function(result) {
+            auction["seller"] = result[0];
+            auction["contractAddress"] = result[1];
+            auction["recordId"] = result[2];
+            auction["title"] = result[3];
+            auction["description"] = result[4];
+            auction["blockNumberOfDeadline"] = result[5].toNumber();
+            auction["distributionCut"] = result[6].toNumber();
+            auction["distributionAddress"] = result[7]
+            auction["startingPrice"] = result[8].toNumber();
+            auction["reservePrice"] = result[9].toNumber();
+            auction["currentBid"] = result[10].toNumber();
+            auction["bidCount"] = result[11].toNumber();
 
-
-        var container = document.getElementById("auction_container");
-        container.innerHTML = constructAuctionView(auction);
-
+            var container = document.getElementById("auction_container");
+            container.innerHTML = constructAuctionView(auction);
       });
 
     });
 }
 
-// function activateAuction(auctionId, recordId) {
 function activateAuction() {
   if (!isOwner()) {
       setStatus("Only seller can activate auction.", "error");
