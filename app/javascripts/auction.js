@@ -137,29 +137,34 @@ function isOwner() {
 }
 
 function constructAuctionView(auction) {
-  result = "<div id='status'>Status: " + auction["status"] + "</div>";
-  result += "<div id='seller_address'>Seller: " + auction["seller"] + "</div>";
-  result += "<div id='title'>Title: " + auction["title"] + "</div>";
-  result += "<div id='description'>Description: " + auction["description"] + "</div>";
-    result += "<div id='currentBid'>Current Bid: " + web3.fromWei(auction["currentBid"], "ether") + " ETH</div>";
-  result += "<div id='bidCount'>Number of Bids: " + auction["bidCount"] + "</div>";
-  result += "<div id='deadline'>Deadline Block Number: " + auction["blockNumberOfDeadline"] + " <span id='deadlineCountdown'></span></div>";
+    $("#auctionTitle").text(auction["title"]);
+    
+    result = "<table class='auctionDetails'>";
+    result += "<tr><td class='auctionlabel'>Status:</td><td>" + auction["status"] + "</td></tr>";
+    result += "<tr><td class='auctionlabel'>Seller:</td><td>" + auction["seller"] + "</td></tr>";
+    result += "<tr><td class='auctionlabel'>Title:</td><td>" + auction["title"] + "</td></tr>";
+    result += "<tr><td class='auctionlabel'>Description:</td><td>" + auction["description"] + "</td></tr>";
+    result += "<tr><td class='auctionlabel'>Current Bid:</td><td>" + web3.fromWei(auction["currentBid"], "ether") + " ETH" + "</td></tr>";
+    result += "<tr><td class='auctionlabel'>Number of Bids:</td><td>" + auction["bidCount"] + "</td></tr>";
+    result += "<tr><td class='auctionlabel'>Deadline Block Number:</td><td>" + auction["blockNumberOfDeadline"] + " <span id='deadlineCountdown'></span>" + "</td></tr>";
+    
+    //Activate auction button
+    if (auction["status"] == "Pending" && isOwner()) {
+	result += "<tr><td class='auctionLabel'>Activate Auction:</td><td><button id='activation_button' onclick='activateAuction()'>Activate Auction</button></td></tr>";
+    } 
 
-  //Activate auction button
-  if (auction["status"] == "Pending" && isOwner()) {
-    result += "<button id='activation_button' onclick='activateAuction()'>Activate Auction</button>";
-  } 
+    //Place bid button
+    if (auction["status"] == "Active" && currentBlockNumber <= auction["blockNumberOfDeadline"]) {
+	result += "<tr><td class='auctionLabel'>Bid (in eth):</td><td><input type='text' id='bid_value' placeholder='eg 3.0'></input></td></tr>";
+	result += "<tr><td class='auctionLabel'>&nbsp;</td><td><button id='bid_button' class='btn btn-primary' onclick='placeBid()'>Place Bid</button></td></tr>";
+    }
 
-  //Place bid button
-  if (auction["status"] == "Active" && currentBlockNumber <= auction["blockNumberOfDeadline"]) {
-    result += "<label for='bid_value'>Bid (in eth):</label><input type='text' id='bid_value' placeholder='eg 3.0'></input>";
-    result += "<button id='bid_button' onclick='placeBid()'>Place Bid</button>";
-  }
+    //End auction button
+    if (auction["status"] == "Active" && auction["seller"] == account && currentBlockNumber > auction["blockNumberOfDeadline"]) {
+	result += "<tr><td class='auctionLabel'>End Auction:</td><td><button id='end_button' onclick='endAuction()'>End Auction</button></td></tr>";
+    }
 
-  //End auction button
-  if (auction["status"] == "Active" && auction["seller"] == account && currentBlockNumber > auction["blockNumberOfDeadline"]) {
-    result += "<button id='end_button' onclick='endAuction()'>End Auction</button>";
-  }
+    result += "</table>";
 
   return result;
 }
@@ -235,7 +240,7 @@ function updateBlockNumber() {
 
 	    if (blocksLeft > 0) {
 		var minsLeft = blocksLeft * 12.5 / 60;  // About 12 second block times
-		$("span#deadlineCountdown").text("(" + blocksLeft + " blocks, and " + minsLeft + "minutes from now)");
+		$("span#deadlineCountdown").text("(" + blocksLeft + " blocks, and " + minsLeft + " minutes from now)");
 	    }
 	}
     });
