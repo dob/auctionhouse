@@ -21,7 +21,7 @@ function updateAuctions() {
 		auctionHouseContract.getAuction.call(idx).then(function(auc) {
 		    console.log("Found an auction: " + auc[3]);
 		    var bidAmount = web3.fromWei(auc[10], "ether");
-		    res = res + "<br>" + auc[3] + ": " + bidAmount + " ETH";
+		    res = res + "<br><a href='auction.html?auctionId=" + idx + "'>" + auc[3] + "</a>: " + bidAmount + " ETH";
 		    auctionSection.innerHTML = res;
 		});
 	    });
