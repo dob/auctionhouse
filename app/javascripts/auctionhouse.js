@@ -27,7 +27,17 @@ function updateEthNetworkInfo() {
 
     var network = document.getElementById("network");
     var provider = web3.version.getNetwork(function(err, net) {
-	network.innerHTML = net;
+	var networkDisplay;
+
+	if(net == 1) {
+	    networkDisplay = "Ethereum MainNet";
+	} else if (net == 2) {
+	    networkDisplay = "Morden TestNet";
+	} else {
+	    networkDisplay = net;
+	}
+	    
+	network.innerHTML = networkDisplay;
     });
 }
 
