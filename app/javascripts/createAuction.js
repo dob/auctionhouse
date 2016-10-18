@@ -5,10 +5,7 @@ var currentBlockNumber;
 var auctionHouseContract;
 var sampleNameContract;
 
-// function setAuctionStatus(message) {
-//   var status = document.getElementById("auctionstatus");
-//   status.innerHTML = message;
-// };
+var infoBoxHTMLCreate = "<p>Here's where you can create an auction to auction off any on-chain item you own that conforms to the <a href='https://testnet.etherscan.io/address/0x73e4fce33c5908aa3cdd3c93c4ce7d181c2db7f4'>Asset contract</a>. Since this is a prototype and very few contracts adhere to this, you have the chance to register a 'name' that adheres to this, so you can create a test auction. First register any name, such as myname.address, and when that transaction confirms, create an auction for that same name.</p><p>After successful auction creation, you can visit the page for that auction to activate it.</p>";
 
 function updateAuctions() {
     var auctionSection = document.getElementById("userAuctions");
@@ -92,7 +89,9 @@ function createAuction() {
 };
 
 window.onload = function() {
-    $("#right-column").load("rightPanel.html");
+    $("#right-column").load("rightPanel.html", function() {
+	updateInfoBox(infoBoxHTMLCreate);
+    });
 
     getContractAddress(function(ah_addr, sn_addr, error) {
 	if (error != null) {
