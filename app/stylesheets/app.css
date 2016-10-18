@@ -3,6 +3,10 @@ body {
   padding-bottom: 30px;
 }
 
+#homepageBody {
+  background: #131f28;
+}
+
 .theme-dropdown .dropdown-menu {
   position: static;
   display: block;
@@ -60,4 +64,75 @@ body {
 
 .auctionDetails td {
     padding: 8px;
+}
+
+#headerRow {
+    text-align: center;
+    background-color: #131f28;
+}
+
+#headerRow h1 {
+    color: #ffe160;
+    font-size: 42px;
+}
+
+#headerRow #headerLabel {
+    margin: 20px auto;
+    text-align: center;
+    width: 500px;
+}
+
+#headerRow li {
+    color: white;
+    padding: 5px;
+    list-style-type: none;
+}
+
+#headerRow p {
+    color: #666666;
+}
+
+#headerRow hr {
+    width: 100px;
+    margin-bottom: 60px;
+}
+
+#headerRow #createAuctionButton {
+    background-image: linear-gradient(to bottom,#95f4f1 0,#95f4f1 100%);
+    color: #131f28;
+    font-size: 14px;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    border-color: #95f4f1;
+    background-color: #95f4f1;
+}
+
+#headerRow img#heroImage {
+    width: 300px;
+    height: 139px;
+    margin-top: 40px;
+}
+
+#headerRow #exampleList {
+    margin-bottom: 60px;
+}
+
+#auctionRow {
+    background-color: white;
+}
+
+#auctionRow h1 {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+#statusRow {
+    background-color: #f2f2f2;
+}
+
+#statusRow h1 {
+    text-align: center;
+    margin-top: 60px;
+    margin-bottom: 60px;
 }

@@ -26,7 +26,7 @@
     <script src="./network.js"></script>
     <script src="./app.js"></script>
   </head>
-  <body>
+  <body id="homepageBody">
 
         <!-- Fixed navbar -->
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -42,8 +42,8 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#auctionSection">Auctions</a></li>
+            <li class="active"><a href="index.html">Home</a></li>
+            <li><a href="#auctionRow">Auctions</a></li>
             <li><a href="createAuction.html">New Auction</a></li>
             <li><a href="about.html">About</a></li>
           </ul>
@@ -51,63 +51,109 @@
       </div>
     </nav>
 
-    <div class="container theme-showcase" role="main">
+    <div role="main">
 
-      <!-- Going to set up an 8-4 column grid -->
-      <div class="row">
-	<div class="col-md-8">
+      <!-- First Row -->
+      <div class="row" id="headerRow">
 	
 	  <!-- Main jumbotron for a primary marketing message or call to action -->
-	  <div class="jumbotron">
-            <h1>AuctionHouse</h1>
-	    <h2>Decentralized Asset Auctions</h2>
-	    <p> Examples of things you can auction off include:</p>
-	    <div class="row">
-		<ul class="list-group">
-		  <li class="list-group-item">A domain name in the Ethereum Name Service
-		    (auctionhouse.address)</li>
-		  <li class="list-group-item">An on chain virtual good (the powerful sword in an
-		    Ethereum based RPG)</li>
-		  <li class="list-group-item">A real world good represented by a token on the blockchain
-		    (a concert ticket)</li>
-		  <li class="list-group-item">A large block of tokens sellable at once</li>
-		  <li class="list-group-item">A token that represents a role in an on-chain economy</li>
-		  <li class="list-group-item">Read more about what you can auction and how it works in our
-		    <a href="about.html">about page</a>.</li>
-		</ul>
-
-		<p>
-		  <a role="button" class="btn btn-lg btn-primary" href="createAuction.html">Create an auction</a>
+	  <!--<div class="jumbotron">-->
+	  <div>
+	    <img src="images/auctionhouse2.png" alt="AuctionHouse" id="heroImage">
+	    <div id="headerLabel"><h1>Decentralized auctions for on-chain assets</h1></div>
+	    <p>
+		  <a role="button" class="btn btn-lg btn-primary"
+		  href="createAuction.html" id="createAuctionButton">Create an auction</a>
 		</p>
+
+	    <hr />
+	    
+	    <p> Examples of what you can auction</p>
+	    <div class="row">
+		<ul id="exampleList">
+		  <li>A domain name in the Ethereum Name Service</li>
+		  <li>An on chain virtual good (the powerful sword in an
+		    Ethereum based RPG)</li>
+		  <li>A real world good represented by a token on the blockchain
+		    (a concert ticket)</li>
+		  <li>A token that represents a role in an on-chain economy</li>
+		  <li>A large block of tokens sellable at once</li>
+		  <li>Plus <a href="about.html">much more</a>.</li>
+		</ul>
 
 	    </div><!-- row -->
 	  </div><!-- jumbotron -->
+      </div>
 
-	  <div class="page-header" id="auctionSection">
+      <!-- Second Row -->
+      <div class="row" id="auctionRow">
+	<div class="col-md-1"></div>
+	<div class="col-md-10">
+	  <div id="auctionSection">
 	    <h1>Currently Running Auctions</h1>
 	  </div>
-	  <div class="row">
-
-	      <table class="table table-striped">
-		<thead>
-		  <tr>
-		    <th>Title</th>
-		    <th>Current Bid</th>
-		    <th># of Bids</th>
-		    <th>Ending Block</th>
-		  </tr>
-		</thead>
-		<tbody id="userAuctions"></tbody>
-	      </table>
-	  </div>
-	</div> <!-- The column of 8 -->
-
-
-	<div class="col-md-4"> <!-- The right column of 4 -->
-	  <div id="right-column"></div>
+	  
+	  <table class="table table-striped">
+	    <thead>
+	      <tr>
+		<th>Title</th>
+		<th>Current Bid</th>
+		<th># of Bids</th>
+		<th>Ending Block</th>
+	      </tr>
+	    </thead>
+	    <tbody id="userAuctions"></tbody>
+	  </table>
 	</div>
-	
-      </div> <!-- original row -->
+      </div>
+      
+      <!-- Third row -->
+      <div class="row" id="statusRow">
+	  <h1>About</h1>
+	  <div class="col-md-1"></div>
+	  <div class="col-md-5">
+	    <div class="panel panel-info" id="infoPanel">
+	      <div class="panel-heading">
+		<h3 class="panel-title">What's going on here?</h3>
+	      </div>
+	      <div class="panel-body" id="infoPanelText">
+		<p>This homepage lists the currently running
+		  auctions. Check them out, or create your own!</p>
+		<p>Auctionhouse is a decentralized application (Dapp) that lets
+		  users auction off non-fungible on-chain assets. What does this
+		  mean?  When you have fungible assets like Augur REP tokens, you
+		  can easily sell them on an exchange since they're all
+		  interchangeable. But when you have a token that represents
+		  something one-of-a-kind, something unique, it's better served to
+		  auction it off, since there's no liquidity on exchanges for these
+		  one off items.</p>
+	      </div>
+	    </div>
+	  </div>
+
+	  <div class="col-md-5">
+            <div class="panel panel-success" id="statusPanel">
+              <div class="panel-heading">
+		<h3 class="panel-title">Ethereum Status</h3>
+              </div>
+              <div class="panel-body">
+		<p>
+		  Your address:
+		  <span id="address"></span>
+		  <br>
+		  Your balance: <span id="ethBalance"></span>
+		  <br>
+		  Your network: <span id="network"></span>
+		</p>
+
+		<p><span id="statusMessage"></span><span id="spinner"></span></p>
+              </div>
+	    </div>
+	  </div>
+
+	  
+	</div>
+      
     </div><!-- container -->
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

@@ -42,8 +42,6 @@ function updateAuctions() {
 }
 
 window.onload = function() {
-    $("#right-column").load("rightPanel.html");
-    
     getContractAddress(function(ah_addr, sn_addr, error) {
         if (error != null) {
             setStatus("Cannot find network");
