@@ -46,8 +46,9 @@ contract("AuctionHouse", function(accounts) {
 
 					    return ah.getAuction.call(targetAuctionId).then(function(auction) {
 						assert.strictEqual(auction[0], owner, "Didn't get the correct seller");
-						assert.strictEqual(auction[3], "Title", "Didn't get an updated auction");
-						assert.equal(auction[10], startingBid, "Didn't get an updated auction bid price");
+						assert.strictEqual(auction[3], "Title", "Didn't set an auction name");
+            assert.equal(auction[8], startingBid, "Didn't set a starting bid price")
+						assert.equal(auction[10], startingBid, "Didn't set a current bid price");
 						return ah.getAuctionsCountForUser.call(owner);
 					    }).then(function(auctionsCount) {
 					 	assert.strictEqual(auctionsCount.toNumber(), 1, "Should only have 1 auction");
