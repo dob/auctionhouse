@@ -115,4 +115,8 @@ tx.origin is the user who initiated the call, and msg.sender is the last person 
 7. Unlock account0: `personal.unlockAccount(eth.accounts[0], "password")`
 8. Run simple test: `truffle test test/Simple.js`
 
+-----
 
+Note from Doug...I changed the launch command a bit to
+
+`./geth --identity "ericnode" --rpc --rpcport "8545" --rpccorsdomain "chrome-extension://idknbmbdnapjicclomlijcgfpikmndhd" --datadir ~/.chaindata/ --port "30303" --rpcapi "db,eth,net,web3,personal" --networkid 1999 console`

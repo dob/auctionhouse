@@ -69,15 +69,15 @@ contract AuctionHouse {
     }
 
     modifier onlyLive(uint auctionId) {
-	// Auction a = auctions[auctionId];
-	// if (a.status != AuctionStatus.Active) {
-	//     throw;
-	// }
+	Auction a = auctions[auctionId];
+	if (a.status != AuctionStatus.Active) {
+	    throw;
+	}
 
-	// // Auction should not be over
-	// if (block.number >= a.blockNumberOfDeadline) {
-	//     throw;
-	// }
+	// Auction should not be over
+	if (block.number >= a.blockNumberOfDeadline) {
+	    throw;
+	}
 	_;
     }
     
@@ -85,13 +85,6 @@ contract AuctionHouse {
 	owner = msg.sender;
     }
 
-    // This is a convenience function for development, testing debugging
-    // and catching throws in the tests. Can remove after getting the
-    // pattern down.
-    function throwTest() {
-	throw;
-    }
-    
     // Create an auction, transfer the item to this contract, activate the auction
     function createAuction(
 	string _title,
@@ -172,9 +165,9 @@ contract AuctionHouse {
      */
     function getAuction(uint idx) returns (address, address, string, string, string, uint, uint, address, uint256, uint256, uint256, uint) {
 	Auction a = auctions[idx];
-    if (a.seller == 0) {
-        throw;
-    }
+	if (a.seller == 0) {
+            throw;
+	}
 
 	return (a.seller,
 		a.contractAddress,
@@ -188,7 +181,7 @@ contract AuctionHouse {
 		a.reservePrice,
 		a.currentBid,
 		a.bids.length
-        );
+               );
     }
 
     function getAuctionCount() returns (uint) {
@@ -259,15 +252,6 @@ contract AuctionHouse {
 	return (b.bidder, b.amount, b.timestamp);
     }
 
-    function placeBidTest(uint auctionId) returns (bool) {
-        return true;
-    }
-
-    function testFunction() {
-        uint128 amount = uint128(msg.value);
-        //send the ether somewhere
-    }
-
     function placeBid(uint auctionId) payable onlyLive(auctionId) returns (bool success) {
 	uint256 amount = msg.value;
 	Auction a = auctions[auctionId];
@@ -304,19 +288,22 @@ contract AuctionHouse {
     function endAuction(uint auctionId) returns (bool success) {
 	// Check if the auction is passed the end date
 	Auction a = auctions[auctionId];
+	
 	if (block.number < a.blockNumberOfDeadline) {
 	    LogFailure("Can not end an auction that hasn't hit the deadline yet");
 	    return false;
 	}
 
+	Asset asset = Asset(a.contractAddress);
+
 	// No bids, make the auction inactive
 	if (a.bids.length == 0) {
+	    asset.setOwner(a.recordId, a.seller);
 	    a.status = AuctionStatus.Inactive;
 	    return true;
 	}
 
 	Bid topBid = a.bids[a.bids.length - 1];
-	Asset asset = Asset(a.contractAddress);
 
 	// If the auction hit its reserve price
 	if (a.currentBid >= a.reservePrice) {
