@@ -57,9 +57,12 @@ function createAuction() {
     showSpinner();
 
     var recordId = document.getElementById("nameToAuction").value;
-    sampleNameContract.owner.call(recordId).then(function(res) {
+    var contractAddress = document.getElementById("contractAddress").value;
+    var assetInstanceContract = Asset.at(contractAddress);
+    
+    assetInstanceContract.owner.call(recordId).then(function(res) {
 	if (!(res === account)) {
-	    setStatus("Looks like you don't own that name", "error");
+	    setStatus("Looks like you don't own that asset", "error");
 	    hideSpinner();
 	    return;
 	}
@@ -72,7 +75,7 @@ function createAuction() {
 
 	auctionHouseContract.createAuction(recordId,
 			 "Auction for this unique name!",
-			 sampleNameContract.address,
+			 contractAddress,
 			 recordId,
 			 deadline,
 			 startingPrice,
@@ -102,6 +105,9 @@ window.onload = function() {
 
 	auctionHouseContract = AuctionHouse.at(ah_addr);
 	sampleNameContract = SampleName.at(sn_addr);
+
+	// Set the value of contract address field to the sampleName contract
+	$("#contractAddress").val(sn_addr);
 
 	web3.eth.getAccounts(function(err, accs) {
 	    if (err != null) {

@@ -60,6 +60,19 @@ body {
 
 .auctionLabel {
     width: 190px;
+    vertical-align: top;
+}
+
+#nameToAuction {
+    width: 400px;
+}
+
+#nameToReserve {
+    width: 400px;
+}
+
+#contractAddress {
+    width: 400px;
 }
 
 .auctionDetails td {

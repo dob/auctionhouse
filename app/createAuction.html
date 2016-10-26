@@ -71,8 +71,20 @@
 
 	  <h1>Now auction off your item</h1>
 	  <table class="auctionDetails">
-	    <tr><td class="auctionLabel"><label for="nameToAuction">Name
-	    To Auction:</label></td><td><input type="text" id="nameToAuction" placeholder="eg dougwallet.eth"></input></td></tr>
+	    <tr><td class="auctionLabel"><label for="nameToAuction">Asset
+	    RecordId to Auction:</label></td><td><input type="text"
+	    id="nameToAuction" placeholder="eg dougwallet.eth"></input>
+		<br><p><i>(Name registered above.)</i></p>
+	    </td></tr>
+
+	    <tr><td class="auctionLabel"><label for="contractAddress">Contract
+	    Address:</label></td><td><input type="text"
+	    id="contractAddress" placeholder="eg
+					      0x536d6b87f21d8bbf23dd7f33fc3ca90e85cba0b6"></input>
+		<br>
+		<p><i>(If auctioning a name registered above, use the
+		prefilled value.)</i></p>
+	    </td></tr>
 
 	    <tr><td class="auctionLabel"><label for="startingPrice">Starting Price in Ether:</label></td><td><input type="text" id="startingPrice" placeholder="eg 2.2"></input></td></tr>
 	    <tr><td class="auctionLabel"><label for="reservePrice">Reserve Price in Ether:</label></td><td><input type="text" id="reservePrice" placeholder="eg 3.0"></input></td></tr>
