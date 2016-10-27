@@ -45,7 +45,7 @@ function createAsset() {
       });
   }).catch(function(e) {
     console.log(e);
-    setErrorMsg("Error registering name. See log.");
+      setStatus("Error registering name. See log.", "error");
     hideSpinner();
   });
 };
@@ -98,7 +98,7 @@ window.onload = function() {
 
     getContractAddress(function(ah_addr, sn_addr, error) {
 	if (error != null) {
-	    setErrorMsg("Cannot find network");
+	    setStatus("Cannot find network", "error");
 	    console.log(error);
 	    throw "Cannot load contract address";
 	}

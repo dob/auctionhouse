@@ -75,7 +75,9 @@ function activateAuction() {
     setStatus("Transfering ownership to the contract...", "warning");
     showSpinner();
 
-    sampleNameContract.setOwner(auction["recordId"], auctionHouseContract.address, {from: account, gas: 500000}).then(function(txnId) {
+    var assetContract = Asset.at(auction["contractAddress"]);
+
+    assetContract.setOwner(auction["recordId"], auctionHouseContract.address, {from: account, gas: 500000}).then(function(txnId) {
 	console.log("set owner transaction: " + txnId);
 	setStatus("Ownership transfer complete!");
 	hideSpinner();
