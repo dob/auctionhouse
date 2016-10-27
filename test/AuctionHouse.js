@@ -1,7 +1,82 @@
 var log = console.log;
 var balance = web3.eth.getBalance;
 
+function createRecord(sn, owner, recordId, fromAddr, callback) {
+  sn.addRecord(recordId, owner, recordId, owner, {from:fromAddr}).then(function(res) {
+    callback();
+  });
+}
+
+function createAuction(recordId, 
+                      title, 
+                      desc, 
+                      contractAddrOfAsset, 
+                      deadline,
+                      startingPrice,
+                      reservePrice,
+                      distributionCut,
+                      distributorAddr,
+                      fromAddr,
+                      callback) {
+  // sn.addRecord(recordId, owner, recordId, owner, {from: owner}).then(function(res) {
+    return AuctionHouse.new().then(function(ah) {
+      return ah.createAuction(title,
+          desc,
+          contractAddrOfAsset,
+          recordId,
+          deadline,
+          startingPrice,
+          reservePrice,
+          distributionCut,
+          distributorAddr, {from:fromAddr}).then(function(txId) {
+            callback(ah);
+          });
+    });
+  // });
+}
+
 contract("AuctionHouse", function(accounts) {
+  it("should check and see if the asset is already on auction", function() {
+    var sn = SampleName.deployed();
+    var owner = accounts[9];
+    var recordId = "test9.name";
+    var title = "title";
+    var desc = "desc";
+    var contractAddrOfAsset = sn.address;
+    var deadline = web3.eth.blockNumber + 100;
+    var startingPrice = web3.toWei(0.2, "ether");
+    var reservePrice = web3.toWei(0.3, "ether");
+    var distributionCut = 5;
+    var distributorAddr = accounts[2];
+
+    createRecord(sn, owner, recordId, owner, function() {
+      //Create an auction
+      createAuction(recordId, 
+                    title,
+                    desc,
+                    contractAddrOfAsset,
+                    deadline,
+                    startingPrice,
+                    reservePrice,
+                    distributionCut,
+                    distributorAddr,
+                    owner,
+                    function(ah) {
+        return ah.getAuctionCount.call().then(function(auctionCount) {
+          assert.strictEqual(auctionCount.toNumber(), 1, "there should be 1 auction created");
+
+          //Create another auction with the same record
+          createAuction(recordId, title, desc, contractAddrOfAsset, deadline, startingPrice, reservePrice, distributionCut, distributorAddr, owner, function(ah) {
+            return ah.getAuctionCount.call().then(function(auctionCount) {
+              assert.strictEqual(auctionCount.toNumber(), 1, "there should still be 1 auction created (cannot auction the same asset twice)");
+            });
+          });
+        });
+
+      });
+    });
+  });
+
     it("should know if a seller owns an asset on an external contract", function() {
 	var sn = SampleName.deployed();
 	var owner = accounts[0];
