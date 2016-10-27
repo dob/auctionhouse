@@ -23,14 +23,15 @@ contract SampleName is Asset {
 	return records[_recordId].owner;
     }
 
-    function setOwner(string _recordId, address _newOwner) onlyOwner(_recordId) {
+    function setOwner(string _recordId, address _newOwner) onlyOwner(_recordId) returns (bool success) {
 	records[_recordId].owner = _newOwner;
+	return true;
     }
 
     function addRecord(string _recordId, address _owner, string _name, address _walletAddress) returns (bool sufficient) {
 	if (records[_recordId].owner != 0) {
 	    // If a record with this name already exists
-	    throw;
+	    return false;
 	}
 
 	Record r = records[_recordId];
@@ -45,7 +46,7 @@ contract SampleName is Asset {
     function updateRecordWalletAddress(string _recordId, address _newWalletAddress) onlyOwner(_recordId) returns (bool success) {
 	if (records[_recordId].owner == 0) {
 	    // We don't know this record
-	    throw;
+	    return false;
 	}
 
 	records[_recordId].walletAddress = _newWalletAddress;

@@ -219,7 +219,9 @@ contract AuctionHouse {
 	if (a.currentBid >= a.reservePrice) throw;   // Can't cancel the auction if someone has already outbid the reserve.
 
         Asset asset = Asset(a.contractAddress);
-        asset.setOwner(a.recordId, a.seller);
+        if(!asset.setOwner(a.recordId, a.seller)) {
+	    throw;
+	}
 
 	// Return funds to the bidder
 	uint bidsLength = a.bids.length;
@@ -278,6 +280,7 @@ contract AuctionHouse {
 	    Bid previousBid = a.bids[bidIdx - 1];
 	    if (!previousBid.bidder.send(previousBid.amount)) {
 		LogFailure("Could not return the outbid amount to the previous bidder");
+		throw;
 	    }
 	}
 
@@ -298,7 +301,9 @@ contract AuctionHouse {
 
 	// No bids, make the auction inactive
 	if (a.bids.length == 0) {
-	    asset.setOwner(a.recordId, a.seller);
+	    if(!asset.setOwner(a.recordId, a.seller)) {
+		throw;
+	    }
 	    a.status = AuctionStatus.Inactive;
 	    return true;
 	}
@@ -310,16 +315,30 @@ contract AuctionHouse {
 	    uint distributionShare = a.currentBid * a.distributionCut / 100;  // Calculate the distribution cut
 	    uint sellerShare = a.currentBid - distributionShare;
 
-	    asset.setOwner(a.recordId, topBid.bidder);  // Set the items new owner
+	    if(!asset.setOwner(a.recordId, topBid.bidder)) {
+		throw;
+	    } // Set the items new owner
 	    
-	    if (!a.distributionAddress.send(distributionShare)) { LogFailure("Couldn't send the marketing distribution"); }
-	    if (!a.seller.send(sellerShare)) { LogFailure("Couldn't send the seller his cut"); }
+	    if (!a.distributionAddress.send(distributionShare)) {
+		LogFailure("Couldn't send the marketing distribution");
+		throw;
+	    }
+
+	    if (!a.seller.send(sellerShare)) {
+		LogFailure("Couldn't send the seller his cut");
+		throw;
+	    }
 
 	    AuctionEndedWithWinner(auctionId, topBid.bidder, a.currentBid);
 	} else {
 	    // Return the item to the owner and the money to the top bidder
-	    asset.setOwner(a.recordId, a.seller);
-	    if (!topBid.bidder.send(a.currentBid)) { LogFailure("Couldn't send the top bidder his money back on a failed to meet reserve scenario."); }
+	    if(!asset.setOwner(a.recordId, a.seller)) {
+		throw;
+	    }
+	    if (!topBid.bidder.send(a.currentBid)) {
+		LogFailure("Couldn't send the top bidder his money back on a failed to meet reserve scenario.");
+		throw;
+	    }
 
 	    AuctionEndedWithoutWinner(auctionId, a.currentBid, a.reservePrice);
 	}

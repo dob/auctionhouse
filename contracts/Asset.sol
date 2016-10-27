@@ -6,5 +6,5 @@ pragma solidity ^0.4.2;
 contract Asset {
     function owner(string _recordId) returns (address ownerAddress);
 
-    function setOwner(string _recordId, address _newOwner);    
+    function setOwner(string _recordId, address _newOwner) returns (bool success);    
 }
