@@ -82,7 +82,7 @@ contract AuctionHouse {
         }
         _;
     }
-    
+
     function AuctionHouse() {
         owner = msg.sender;
     }
@@ -266,7 +266,7 @@ contract AuctionHouse {
         if(idx > a.bids.length - 1) {
             throw;
         }
-        
+
         Bid b = a.bids[idx];
         return (b.bidder, b.amount, b.timestamp);
     }
@@ -309,7 +309,7 @@ contract AuctionHouse {
         // Check if the auction is passed the end date
         Auction a = auctions[auctionId];
         activeContractRecordConcat[strConcat(addrToString(a.contractAddress), a.recordId)] = false;
-        
+
         if (block.number < a.blockNumberOfDeadline) {
             LogFailure("Can not end an auction that hasn't hit the deadline yet");
             return false;
@@ -336,7 +336,7 @@ contract AuctionHouse {
             if(!asset.setOwner(a.recordId, topBid.bidder)) {
                 throw;
             } // Set the items new owner
-            
+
             if (!a.distributionAddress.send(distributionShare)) {
                 LogFailure("Couldn't send the marketing distribution");
                 throw;
@@ -386,4 +386,5 @@ contract AuctionHouse {
             b[i] = byte(uint8(uint(x) / (2**(8*(19 - i)))));
         return string(b);
     }
+
 }

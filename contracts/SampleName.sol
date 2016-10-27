@@ -50,6 +50,6 @@ contract SampleName is Asset {
         }
 
         records[_recordId].walletAddress = _newWalletAddress;
-        return true;    
+        return true;	
     }
 }
