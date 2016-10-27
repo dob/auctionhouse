@@ -46,6 +46,8 @@ contract AuctionHouse {
 
     mapping(address => uint[]) public auctionsBidOnByUser; // Pointer to auctions index for auctions this user has bid on
 
+    mapping(string => bool) activeContractRecordConcat;
+
     address owner;
 
     // Events
@@ -121,6 +123,11 @@ contract AuctionHouse {
 		throw;
 	    }
 
+      if (activeContractRecordConcat[strConcat(addrToString(_contractAddressOfAsset), _recordIdOfAsset)] == true) {
+        LogFailure("Item already on auction");
+        throw;
+      }
+
 	    auctionId = auctions.length++;
 	    Auction a = auctions[auctionId];
 	    a.seller = msg.sender;
@@ -137,6 +144,10 @@ contract AuctionHouse {
 	    a.currentBid = _startingPrice;
 
             auctionsRunByUser[a.seller].push(auctionId);
+            activeContractRecordConcat[strConcat(addrToString(_contractAddressOfAsset), _recordIdOfAsset)] = true;
+
+            // activeRecordId[a.contractAddress]
+            // auctionWithRecordId[_recordIdOfAsset] = auctionId;
 	    AuctionCreated(auctionId, a.title, a.startingPrice, a.reservePrice);
 
 	    return auctionId;
@@ -201,6 +212,10 @@ contract AuctionHouse {
         return auctionsRunByUser[addr][idx];
     }
 
+    function getActiveContractRecordConcat(string _contractRecordConcat) returns (bool) {
+      return activeContractRecordConcat[_contractRecordConcat];
+    }
+
     // Checks if this contract address is the owner of the item for the auction
     function activateAuction(uint auctionId) onlySeller(auctionId) returns (bool){
         Auction a = auctions[auctionId];
@@ -231,6 +246,8 @@ contract AuctionHouse {
 		LogFailure("Couldn't return funds to the bidder");
 		return false;
 	    }
+
+  activeContractRecordConcat[strConcat(addrToString(a.contractAddress), a.recordId)] = false;
 	}
 
 	AuctionCancelled(auctionId);
@@ -291,6 +308,7 @@ contract AuctionHouse {
     function endAuction(uint auctionId) returns (bool success) {
 	// Check if the auction is passed the end date
 	Auction a = auctions[auctionId];
+  activeContractRecordConcat[strConcat(addrToString(a.contractAddress), a.recordId)] = false;
 	
 	if (block.number < a.blockNumberOfDeadline) {
 	    LogFailure("Can not end an auction that hasn't hit the deadline yet");
@@ -351,4 +369,22 @@ contract AuctionHouse {
 	// Don't allow ether to be sent blindly to this contract
 	throw;
     }
+
+  function strConcat(string _a, string _b) internal returns (string) {
+    bytes memory _ba = bytes(_a);
+    bytes memory _bb = bytes(_b);
+    bytes memory ab = new bytes (_ba.length + _bb.length);
+    uint k = 0;
+    for (uint i = 0; i < _ba.length; i++) ab[k++] = _ba[i];
+    for (i = 0; i < _bb.length; i++) ab[k++] = _bb[i];
+    return string(ab);
+  }
+
+  function addrToString(address x) returns (string) {
+    bytes memory b = new bytes(20);
+    for (uint i = 0; i < 20; i++)
+        b[i] = byte(uint8(uint(x) / (2**(8*(19 - i)))));
+    return string(b);
+}
+
 }

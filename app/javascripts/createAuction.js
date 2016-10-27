@@ -83,10 +83,17 @@ function createAuction() {
 			 10,
 			 marketer,
 			 {from: account, gas:500000}).then(function(txId) {
+          web3.eth.getTransactionReceipt(txId, function(error, receipt) {
+            if (receipt["gasUsed"] == 500000) {
+              setStatus("Auction creation failed", "error");
+              hideSpinner();
+            } else {
+              setStatus("Auction created in transaction: " + txId);
+              hideSpinner();
+              updateAuctions();
+            }
 
-			     setStatus("Auction created in transaction: " + txId);
-			     hideSpinner();
-			     updateAuctions();
+          });
 			 });
     });
 };
