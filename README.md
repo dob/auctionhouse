@@ -11,7 +11,6 @@ Implement an on chain set of smart contracts to govern auctions for non-fungible
 - Set a duration for the auction
 - Set an initial price
 - Set a reserve price
-- Set a buy-it-now price
 - Cancel the auction (in the first X minutes or if the reserve has not been met)
 
 It will allow bidding from other users
@@ -20,8 +19,8 @@ It will allow bidding from other users
 
 It will facilitate the transfer of the asset
 
-- When auction starts the token gets placed in escrow
-- When auction ends if the buy-it-now price is hit, or the time runs out, it will transfer the token to the appropriate person - top bidder if reserve is hit, or back to the owner if the reserve is not hit.
+- When auction starts the token gets placed in escrow. Ownership gets transfered to the contract itself.
+- When auction ends if the reserve price is hit, it will transfer the token to the appropriate person - top bidder if reserve is hit, or back to the owner if the reserve is not hit.
 - If auction is cancelled then the asset transfers back to the owner
 
 It will provide for a distribution incentive
@@ -42,7 +41,7 @@ This is meant to facilitate auctioning off any non-fungible *on-chain* asset. An
 
 ## Technical Standard For Auctionable Items
 
-As mentioned above, there needs to be some convention by which items are made available to be auctioned on this platform. My current thinking is to follow the inspiration of ERC20, which describes fungible tokens and provides methods to find out an owner's balance, the transfer the token, and to allow others to transfer the token on your behalf up to a certain amount.
+As mentioned above, there needs to be some convention by which items are made available to be auctioned on this platform. Current thinking is to follow the inspiration of ERC20, which describes fungible tokens and provides methods to find out an owner's balance, the transfer the token, and to allow others to transfer the token on your behalf up to a certain amount.
 
 In the case of non-fungible assets, there is no concept of "balance", as each item is unique. Generally, a token is represented by an ID, and some associated metadata. An example (inspired from ERC137 which describes name records)...
 
@@ -73,36 +72,25 @@ contract NonFungible {
 
 In this example each record has an owner identified by an address. There is a function for changing the owner, that only the current owner can call. This would facilitate the auction contract to set the owner as the auction contract during the create auction call (which would be initially called by the current owner). It would allow the auction contract itself to set the owner back to the original owner in the case of a failed auction, and to the new owner in the case of a successful one.
 
+For now the contract works with `Assets` that implement the interface described in (Asset.sol)[blob/master/contracts/Asset.sol]. 
+
 ## Dapp Frontend
 
-This protocol is truly decentralized, requiring no authoritative central party, so it can exist entirely on chain via transactions. This means that many different types of frontends are possible. Initially, we would probably provide a centralized auction site, that communicates with a hosted central node on behalf of it's users....
+This protocol is truly decentralized, requiring no authoritative central party, so it can exist entirely on chain via transactions. This means that many different types of frontends are possible. Initially, we provide an example frontend that will connect to a locally running ethereum node by default, or any ethereum network via the Metamask plugin.
 
-However, since the users will be the ones in posession of Eth or auctioned items, they will need to sign transactions initiative auctions or bids. This means that even the centralized site will need to allow them to generate transactions, via Metamask or direct RPC calls to their locally running nodes.
+The app is deployed centrally on AWS pointing at the Morden Testnet at [http://auction-house.s3-website-us-east-1.amazonaws.com/index.html].
 
-This also means that despite the site being deployed centrally initially, it should be made available as a standalone dapp, that anyone can run locally without talking to a central server and potentially even without an internet connection. So an appropriate order of events for dapp development may be:
-
-- Build a centralized auction site that uses Metamask to submit transactions.
-- Make sure that there are instructions for distributed and running it locally.
-- Support an electron style standalone download
-
-At the minimum, this app should probably provide the following functionality:
-
-- Display all currently running auctions
-- Display one specific auction
-- Allow a user to create/publish an auction
-- Allow a user to bid on an auction
-
-Of course there are all sorts of frontend enhancements that can be built including indexing, search, additional metadata, featured listings, categories, etc, but I see these as interesting at the feature/business level and not necessarily the minimum viable features required to support the protocol.
+The app is also deployed on IPFS, but that isn't reliable for upgrades at the moment since the hash will need to constantly be updated. When we go live on the mainnet, we will provide an IPFS hash to reference the reference frontend.
 
 ---
 
 ### Questions
 
-If a contract is an owner of an asset, then can a contract call an onlyOwner function, or would the sender of a message be the person who initiated that transaction within the contract?
+What is the best method for ensuring the underlying implementation of an Asset? It can implement the asset interface, but there's no guarantee that `setOwner()` actually transfers ownership. What does ownership even mean in the case of a one-off unique asset?
 
-tx.origin is the user who initiated the call, and msg.sender is the last person in the chain who made the call, so it would be the contract. In the case of starting an auction, the user would have to grant permission to the contract to transfer ownership of the asset.
+What other incentives besides the distributionCut would you like to see? Incentives for escrow, fraud detection, per-bid referrals?
 
-
+Any security holes in the contracts? Right now this is in alpha and only on the testnet. I'm sure we'll discover flaws in the implementation before going live on mainnet.
 
 
 ###Local Test Procedure
@@ -117,6 +105,6 @@ tx.origin is the user who initiated the call, and msg.sender is the last person 
 
 -----
 
-Note from Doug...I changed the launch command a bit to
+Note from Doug...I changed the launch command a bit to support only metamask calls and not calls from all external services.
 
 `./geth --identity "ericnode" --rpc --rpcport "8545" --rpccorsdomain "chrome-extension://idknbmbdnapjicclomlijcgfpikmndhd" --datadir ~/.chaindata/ --port "30303" --rpcapi "db,eth,net,web3,personal" --networkid 1999 console`
