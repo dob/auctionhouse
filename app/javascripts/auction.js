@@ -77,20 +77,32 @@ function activateAuction() {
 
     var assetContract = Asset.at(auction["contractAddress"]);
 
-    assetContract.setOwner(auction["recordId"], auctionHouseContract.address, {from: account, gas: 500000}).then(function(txnId) {
-	console.log("set owner transaction: " + txnId);
-	setStatus("Ownership transfer complete!");
-	hideSpinner();
+    assetContract.owner.call(auction["recordId"]).then(function(ownerAddress) {
+	if (ownerAddress != auctionHouseContract.address) {
+	    // Asset not owned by contract. First set its owner to this contract
+	    assetContract.setOwner(auction["recordId"], auctionHouseContract.address, {from: account, gas: 500000}).then(function(txnId) {
+		console.log("set owner transaction: " + txnId);
+		setStatus("Ownership transfer complete!");
+		hideSpinner();
 
-	//Activate the auction
-	setStatus("Activating auction...", "warning");
-	showSpinner();
-	auctionHouseContract.activateAuction(auction["auctionId"], {from: account, gas: 500000}).then(function(txnId) {
-	    console.log("activate auction txnId" + txnId);
-	    setStatus("Auction activated!");
-	    hideSpinner();
-	    refreshAuction();
-	});
+		performActivation();
+	    });
+	} else {
+	    // Asset is already owned by the contract
+	    performActivation();
+	}
+    });
+}
+
+function performActivation() {
+    //Activate the auction
+    setStatus("Activating auction...", "warning");
+    showSpinner();
+    auctionHouseContract.activateAuction(auction["auctionId"], {from: account, gas: 500000}).then(function(txnId) {
+	console.log("activate auction txnId" + txnId);
+	setStatus("Auction activated!");
+	hideSpinner();
+	refreshAuction();
     });
 }
 
