@@ -123,6 +123,11 @@ contract AuctionHouse {
 		throw;
 	    }
 
+      if (activeContractRecordConcat[strConcat(addrToString(_contractAddressOfAsset), _recordIdOfAsset)] == true) {
+        LogFailure("Item already on auction");
+        throw;
+      }
+
 	    auctionId = auctions.length++;
 	    Auction a = auctions[auctionId];
 	    a.seller = msg.sender;
