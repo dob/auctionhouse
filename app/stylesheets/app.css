@@ -33,6 +33,10 @@ body {
     font-weight:bold;
 }
 
+#withdrawBalance {
+    font-weight:bold;
+}
+
 #network {
     font-weight: bold;
 }
