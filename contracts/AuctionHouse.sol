@@ -48,6 +48,8 @@ contract AuctionHouse {
 
     mapping(string => bool) activeContractRecordConcat;
 
+    mapping(address => uint) refunds;
+
     address owner;
 
     // Events
@@ -275,13 +277,7 @@ contract AuctionHouse {
         uint256 amount = msg.value;
         Auction a = auctions[auctionId];
 
-        if (a.currentBid >= amount) {
-            // Want to return the bid amount and return false
-            if(!msg.sender.send(amount)) {
-                LogFailure("Could not return the invalid bid amount to the bidder");
-            }
-            return false;
-        }
+        if (a.currentBid >= amount) throw;
 
         uint bidIdx = a.bids.length++;
         Bid b = a.bids[bidIdx];
@@ -292,17 +288,25 @@ contract AuctionHouse {
 
         auctionsBidOnByUser[b.bidder].push(auctionId);
 
-        // Return ETH to previous bidder
+        // Log refunds for the previous bidder
         if (bidIdx > 0) {
             Bid previousBid = a.bids[bidIdx - 1];
-            if (!previousBid.bidder.send(previousBid.amount)) {
-                LogFailure("Could not return the outbid amount to the previous bidder");
-                throw;
-            }
+            refunds[previousBid.bidder] += previousBid.amount;
         }
 
         BidPlaced(auctionId, b.bidder, b.amount);
         return true;
+    }
+
+    function getRefundValue() returns (uint) {
+        return refunds[msg.sender];
+    }
+
+    function withdrawRefund() {
+        uint refund = refunds[msg.sender];
+        refunds[msg.sender] = 0;
+        if (!msg.sender.send(refund))
+            refunds[msg.sender] = refund;
     }
 
     function endAuction(uint auctionId) returns (bool success) {

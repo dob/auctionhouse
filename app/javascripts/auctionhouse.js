@@ -25,6 +25,26 @@ function updateEthNetworkInfo() {
 	ethBalance.innerHTML = web3.fromWei(bal, "ether") + " ETH";
     });
 
+    var withdrawBalance = document.getElementById("withdrawBalance");
+
+    if (typeof auctionHouseContract != 'undefined' && typeof account != 'undefined') {
+        web3.eth.getBalance(auctionHouseContract.address, function(err, bal) {
+            console.log("contract balance: " + bal);
+        });
+
+        auctionHouseContract.getRefundValue.call({from:account}).then(function(refundBalance) {
+            var balance = web3.fromWei(refundBalance, "ether");
+            withdrawBalance.innerHTML = web3.fromWei(refundBalance, "ether") + " ETH";
+            if (balance == 0) {
+                $("#withdrawButton").hide();
+            } else {
+                $("#withdrawButton").show();
+            }
+        });
+    } else {
+        $("#withdrawButton").hide();
+    }
+
     var network = document.getElementById("network");
     var provider = web3.version.getNetwork(function(err, net) {
 	var networkDisplay;
@@ -39,6 +59,19 @@ function updateEthNetworkInfo() {
 	    
 	network.innerHTML = networkDisplay;
     });
+}
+
+function withdraw() {
+    if (typeof auctionHouseContract != 'undefined' && typeof account != 'undefined') {
+        setStatus("Withdrawing fund...", "warning"); 
+        showSpinner();
+
+        auctionHouseContract.withdrawRefund({from:account, gas:500000}).then(function(txId) {
+            setStatus("Withdraw finished."); 
+            hideSpinner();
+            updateEthNetworkInfo();
+        })
+    }
 }
 
 function updateInfoBox(html) {
