@@ -1,4 +1,4 @@
-var infoBoxHTMLAbout = "<p>This is just some information about AuctionHouse. If you have any additional questions email us at <a href='mailto:petkanics@gmail.com'>petkanics@gmail.com</a>.</p>";
+var infoBoxHTMLAbout = "<p>If you have any additional questions email us at <a href='mailto:petkanics@gmail.com'>petkanics@gmail.com</a>.</p>";
 
 var accounts;
 var account;
