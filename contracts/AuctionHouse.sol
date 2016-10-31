@@ -148,8 +148,6 @@ contract AuctionHouse {
         auctionsRunByUser[a.seller].push(auctionId);
         activeContractRecordConcat[strConcat(addrToString(_contractAddressOfAsset), _recordIdOfAsset)] = true;
 
-        // activeRecordId[a.contractAddress]
-        // auctionWithRecordId[_recordIdOfAsset] = auctionId;
         AuctionCreated(auctionId, a.title, a.startingPrice, a.reservePrice);
 
         return auctionId;
@@ -246,7 +244,7 @@ contract AuctionHouse {
             Bid topBid = a.bids[bidsLength - 1];
             if (!topBid.bidder.send(topBid.amount)) {
                 LogFailure("Couldn't return funds to the bidder");
-                return false;
+                throw;
             }
 
             activeContractRecordConcat[strConcat(addrToString(a.contractAddress), a.recordId)] = false;
@@ -381,5 +379,4 @@ contract AuctionHouse {
             b[i] = byte(uint8(uint(x) / (2**(8*(19 - i)))));
         return string(b);
     }
-
 }
