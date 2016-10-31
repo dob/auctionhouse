@@ -48,22 +48,32 @@ contract("AuctionHouse", function(accounts) {
                                      return ah.getStatus(auctionId);
                                  }).then(function() {
                                      log("CHECKING BALANCES " + web3.eth.blockNumber);
-                                     sellerBalanceAfterBid = balance(owner);
-                                     contractBalanceAfterBid = balance(ah.address);
-                                     bidderBalanceAfterBid = balance(bidder);
-                                     marketerBalanceAfterBid = balance(marketer);
+                                     sellerBalanceAfterBid = balance(owner).toNumber();
+                                     contractBalanceAfterBid = balance(ah.address).toNumber();
+                                     bidderBalanceAfterBid = balance(bidder).toNumber();
+                                     marketerBalanceAfterBid = balance(marketer).toNumber();
                                      return ah.endAuction(auctionId);
                                  }).then(function(){
                                      log("AUCTION OVER " + web3.eth.blockNumber);
                                      sellerBalanceAfterClose = balance(owner).toNumber();
-                                     contractBalanceAfterClose = balance(ah.address);
-                                     bidderBalanceAfterClose = balance(bidder);
-                                     marketerBalanceAfterClose = balance(marketer);
+                                     bidderBalanceAfterClose = balance(bidder).toNumber();
+                                     marketerBalanceAfterClose = balance(marketer).toNumber();
 
-                                     assert.isAbove(sellerBalanceAfterClose, sellerBalanceAfterBid, "Seller balance should have gone up");
-                                     assert.isBelow(contractBalanceAfterClose, contractBalanceAfterBid, "Contract balance should have gone down");
-                                     assert.equal(bidderBalanceAfterBid.toNumber(), bidderBalanceAfterClose.toNumber(), "Bidder balance should stay the same");
-                                     assert.isAbove(marketerBalanceAfterClose, marketerBalanceAfterBid, "Marketer balance should have gone up");
+                                     assert.equal(sellerBalanceAfterClose, sellerBalanceAfterBid, "Seller balance should be the same before withdraw");
+                                     assert.equal(marketerBalanceAfterClose, marketerBalanceAfterBid, "Marketer balance should be the same before withdraw");
+                                     assert.equal(bidderBalanceAfterBid, bidderBalanceAfterClose, "Bidder balance should stay the same");
+
+                                     return ah.withdrawRefund({from:owner});
+                                 }).then(function() {
+                                     sellerBalanceAfterWithdraw = balance(owner).toNumber();
+                                     assert.isAbove(sellerBalanceAfterWithdraw, sellerBalanceAfterClose, "Seller balance should have gone up after withdraw");
+
+                                     return ah.withdrawRefund({from: marketer});
+                                 }).then(function() {
+                                     marketerBalanceAfterWithdraw = balance(marketer).toNumber();
+                                     contractBalanceAfterWithdraw = balance(ah.address).toNumber();
+                                     assert.isAbove(marketerBalanceAfterWithdraw, marketerBalanceAfterClose, "Marketer balance should have gone up after withdraw");
+                                     assert.isBelow(contractBalanceAfterWithdraw, contractBalanceAfterBid, "Contract balance should have gone down");
 
                                      log("PASSED ALL ASSERTIONS");
                                      return sn.owner.call(recordId);

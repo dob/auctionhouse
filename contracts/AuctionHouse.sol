@@ -341,15 +341,8 @@ contract AuctionHouse {
                 throw;
             } // Set the items new owner
 
-            if (!a.distributionAddress.send(distributionShare)) {
-                LogFailure("Couldn't send the marketing distribution");
-                throw;
-            }
-
-            if (!a.seller.send(sellerShare)) {
-                LogFailure("Couldn't send the seller his cut");
-                throw;
-            }
+            refunds[a.distributionAddress] += distributionShare;
+            refunds[a.seller] += sellerShare;
 
             AuctionEndedWithWinner(auctionId, topBid.bidder, a.currentBid);
         } else {
@@ -357,10 +350,8 @@ contract AuctionHouse {
             if(!asset.setOwner(a.recordId, a.seller)) {
                 throw;
             }
-            if (!topBid.bidder.send(a.currentBid)) {
-                LogFailure("Couldn't send the top bidder his money back on a failed to meet reserve scenario.");
-                throw;
-            }
+
+            refunds[topBid.bidder] += a.currentBid;
 
             AuctionEndedWithoutWinner(auctionId, a.currentBid, a.reservePrice);
         }
