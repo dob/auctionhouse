@@ -256,7 +256,9 @@ function updateBlockNumber() {
 	    if (blocksLeft > 0) {
 		var minsLeft = blocksLeft * 12.5 / 60;  // About 12 second block times
 		$("span#deadlineCountdown").text("(" + blocksLeft + " blocks, and " + minsLeft + " minutes from now)");
-	    }
+	    } else if (blocksLeft <= 0 && $("#bid_button").length == 1) {
+            refreshAuction();
+        }
 	}
     });
 }
