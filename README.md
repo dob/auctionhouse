@@ -19,8 +19,8 @@ It will allow bidding from other users
 
 It will facilitate the transfer of the asset
 
-- When auction starts the token gets placed in escrow. Ownership gets transfered to the contract itself.
-- When auction ends if the reserve price is hit, it will transfer the token to the appropriate person - top bidder if reserve is hit, or back to the owner if the reserve is not hit.
+- Before the auction is activated the token gets placed in escrow. Ownership gets transfered to the contract itself.
+- When auction ends if the reserve price is hit, it will allow the transfer of the token to the appropriate person - top bidder if reserve is hit, or back to the owner if the reserve is not hit.
 - If auction is cancelled then the asset transfers back to the owner
 
 It will provide for a distribution incentive

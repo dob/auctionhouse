@@ -23,6 +23,8 @@
     <link href="app.css" rel='stylesheet' type='text/css'>
     <script src="auctionhouse.js"></script>
     <script src="network.js"></script>
+    <script src="app.js"></script>
+    <script src="about.js"></script>
   </head>
   <body>
 
@@ -60,51 +62,154 @@
 
 	  <h1>About AuctionHouse</h1>
 	  <p>
-	    Let's put some info about auctionhouse here.
+            AuctionHouse is a decentralized app built on Ethereum to
+            facilitate the auction of on-chain goods. Here are some
+            frequently asked questions about AuctionHouse.
 	  </p>
+
+          <div class="faq">
+            <div class="faqquestion">
+              <p>
+                What can I auction on AuctionHouse?
+              </p>
+            </div>
+            <div class="faqanswer">
+              <p>
+                Any on-chain asset that conforms to
+                the <a href="https://github.com/dob/auctionhouse/blob/master/contracts/Asset.sol">Asset
+                contract interface</a> can be auctioned. Some examples
+                of things that could be auctioned are virtual goods,
+                domain names, tokens that represent a role in an on
+                chain economy, or tokens that represent real world
+                assets like tickets.
+              </p>
+            </div>
+          </div>
+
+          
+          <div class="faq">
+            <div class="faqquestion">
+              <p>
+                Is AuctionHouse production ready and running on the
+                Ethereum mainnet?
+              </p>
+            </div>
+            <div class="faqanswer">
+              <p>
+                No. AuctionHouse is in alpha and is running on the
+                Ethereum Morden Testnet. We will deploy it on the
+                mainnet after a round of testing and security scrutiny
+                from the community. There are also a number of
+                semantic points that we'd like feedback on including
+                how to best standardize representation of on chain non
+                fungible assets in a secure way, so there may be
+                changes before deploying to the mainnet.
+              </p>
+            </div>
+          </div>
+
+          
+          <div class="faq">
+            <div class="faqquestion">
+              <p>
+                I keep seeing errors about not having a connection to
+                the network. What's this about?
+              </p>
+            </div>
+            <div class="faqanswer">
+              <p>
+                As a decentralized app running on Ethereum, every user
+                will need to be able to connect to an Ethereum node in
+                order to interact with AuctionHouse. The easiest way
+                to do this is to
+                install <a href="http://metamask.io">MetaMask</a>
+                which is a browser extension that will connect you to
+                Ethereum. You can also run your own Ethereum node
+                locally. Remember that the contract is not live on the
+                Mainnet yet, so point your Metamask or Node to the
+                Morden Testnet to try out AuctionHouse.
+              </p>
+            </div>
+          </div>
+
+          
+          <div class="faq">
+            <div class="faqquestion">
+              <p>
+                When my auction ends, or when I get outbid, why do I
+                have to "withdraw" my funds?
+              </p>
+            </div>
+            <div class="faqanswer">
+              <p>
+                For security purposes, it is recommend that Dapps use
+                the withdraw pattern to let people remove their funds
+                from contracts. This prevents a class of attacks where
+                you should receive funds, but the attacker prevents it
+                via stack limits. Instead, we will always show you
+                your withdraw balance, and let you hit the withdraw
+                button to receive these funds as long as your balance
+                is greater than zero.
+              </p>
+            </div>
+          </div>
+
+          
+          <div class="faq">
+            <div class="faqquestion">
+              <p>
+                When I go to create an auction, why do I have to
+                register a name?
+              </p>
+            </div>
+            <div class="faqanswer">
+              <p>
+                Since AuctionHouse is in alpha, and there aren't a lot
+                of auctionable non-fungible goods on the blockchain
+                yet, we wanted to make it easy for people to own an
+                asset that they can auction. For demo purposes we
+                created a simple contract called SampleName, and the
+                "register a name" section on the create auction page
+                is just an interface to register a fake domain name,
+                so that you can create an auction with it. This step
+                is optional, and if you were to deploy a contract that
+                conformed to the Asset interface, then you could
+                auction off a record from that contract.
+              </p>
+            </div>
+          </div>
+
+          
+          <div class="faq">
+            <div class="faqquestion">
+              <p>
+                Who created AuctionHouse?
+              </p>
+            </div>
+            <div class="faqanswer">
+              <p>
+                AuctionHouse was built
+                by <a href="http://twitter.com/petkanics">Doug
+                Petkanics</a>
+                and <a href="http://twitter.com/ericxtang">Eric
+                Tang</a>. We built it in order to get experience
+                building an end-to-end Dapp complete with protocol
+                layer, UI, and decentralized deployment. It's a work
+                in progress, and we'd love to hear any feedback or bug
+                reports through twitter or email, or
+                on <a href="https://github.com/dob/auctionhouse/issues">github
+                issues</a>.
+              </p>
+            </div>
+          </div>
+
+          
 	</div> <!-- The column of 8 -->
 
 
 	<div class="col-md-4"> <!-- The right column of 4 -->
-          <div class="panel panel-success" id="statusPanel">
-            <div class="panel-heading">
-              <h3 class="panel-title">Ethereum Status</h3>
-            </div>
-            <div class="panel-body">
-	      <p>
-		Your address:
-		<span id="address"></span>
-		<br>
-		Your wallet balance: <span id="ethBalance"></span>
-		<br>
-		Your network: <span id="network"></span>
-    <div>
-    Your withdraw balance: <span id="withdrawBalance"></span><button id="withdrawButton" class="btn-sm btn-link" onclick="withdraw()">withdraw</button>
-    </div>
-
-	      </p>
-
-	      <p><span id="statusMessage"></span></p>
-            </div>
-	  </div>
-
-	  <div class="panel panel-info" id="infoPanel">
-	    <div class="panel-heading">
-	      <h3 class="panel-title">What's going on here?</h3>
-	    </div>
-	    <div class="panel-body">
-	      <p>This homepage lists the currently running
-		auctions. Check them out, or create your own!</p>
-	      <p>Auctionhouse is a decentralized application (Dapp) that lets
-	      users auction off non-fungible on-chain assets. What does this
-	      mean?  When you have fungible assets like Augur REP tokens, you
-	      can easily sell them on an exchange since they're all
-	      interchangeable. But when you have a token that represents
-	      something one-of-a-kind, something unique, it's better served to
-	      auction it off, since there's no liquidity on exchanges for these
-	      one off items.</p>
-	    </div>
-	  </div>
+	  <div id="right-column"></div>
+        </div>
 	
       </div> <!-- original row -->
     </div><!-- container -->

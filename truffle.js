@@ -22,6 +22,9 @@ module.exports = {
     "createAuction.js": [
       "javascripts/createAuction.js"
     ],
+    "about.js": [
+      "javascripts/about.js"
+    ],
     "jquery.min.js": [
       "javascripts/jquery.min.js"
     ],

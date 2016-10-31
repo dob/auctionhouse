@@ -153,3 +153,11 @@ body {
     margin-top: 60px;
     margin-bottom: 60px;
 }
+
+.faq {
+    margin-top: 30px;
+}
+
+.faqquestion {
+    font-weight: bold;
+}
