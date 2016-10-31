@@ -42,6 +42,10 @@ contract SampleName is Asset {
         return true;
     }
 
+    function getWalletAddress(string _recordId) returns (address walletAddress) {
+        return records[_recordId].walletAddress;
+    }
+
     // Allow the owner to update the wallet address of the record
     function updateRecordWalletAddress(string _recordId, address _newWalletAddress) onlyOwner(_recordId) returns (bool success) {
         if (records[_recordId].owner == 0) {

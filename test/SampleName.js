@@ -33,4 +33,20 @@ contract("SampleName", function(accounts) {
             });
         });
     });
+
+    it("should allow for lookup of a wallet address", function() {
+        var ownerAddress = accounts[5];
+        var recordId = "myEtherWallet.address";
+
+        return SampleName.new().then(function(sn) {
+            return sn.addRecord(recordId, ownerAddress, recordId, ownerAddress, {from: ownerAddress}).then(function(res) {
+                return sn.getWalletAddress.call(recordId);
+            }).then(function(addr) {
+                assert.strictEqual(addr, ownerAddress, "getWalletAddress didn't work");
+                return sn.getWalletAddress.call("madeupwallet");
+            }).then(function(addr) {
+                assert.strictEqual(addr, "0x0000000000000000000000000000000000000000", "getWalletAddress should have returned the empty address for a madeup wallet");
+            });
+        });
+    });
 });
