@@ -44,7 +44,7 @@ function updateAuctions() {
 window.onload = function() {
     getContractAddress(function(ah_addr, sn_addr, error) {
         if (error != null) {
-            setStatus("Cannot find network");
+            setStatus("Cannot find network. Please run an ethereum node or use Metamask.", "error");
             console.log(error);
             throw "Cannot load contract address";
         }

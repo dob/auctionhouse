@@ -101,40 +101,40 @@ function createAuction() {
 window.onload = function() {
     $("#right-column").load("rightPanel.html", function() {
 	updateInfoBox(infoBoxHTMLCreate);
-    });
 
-    getContractAddress(function(ah_addr, sn_addr, error) {
-	if (error != null) {
-	    setStatus("Cannot find network", "error");
-	    console.log(error);
-	    throw "Cannot load contract address";
-	}
-
-	auctionHouseContract = AuctionHouse.at(ah_addr);
-	sampleNameContract = SampleName.at(sn_addr);
-
-	// Set the value of contract address field to the sampleName contract
-	$("#contractAddress").val(sn_addr);
-
-	web3.eth.getAccounts(function(err, accs) {
-	    if (err != null) {
-		alert("There was an error fetching your accounts.");
-		return;
+        getContractAddress(function(ah_addr, sn_addr, error) {
+	    if (error != null) {
+	        setStatus("Cannot find network. Please run an ethereum node or use Metamask.", "error");
+	        console.log(error);
+	        throw "Cannot load contract address.";
 	    }
 
-	    if (accs.length == 0) {
-		alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
-		return;
-	    }
+	    auctionHouseContract = AuctionHouse.at(ah_addr);
+	    sampleNameContract = SampleName.at(sn_addr);
 
-	    accounts = accs;
-	    account = accounts[0];
+	    // Set the value of contract address field to the sampleName contract
+	    $("#contractAddress").val(sn_addr);
 
-	    updateEthNetworkInfo();
-	    updateAuctions();
-	    updateBlockNumber();
-	    watchEvents();
-	});
+	    web3.eth.getAccounts(function(err, accs) {
+	        if (err != null) {
+		    alert("There was an error fetching your accounts.");
+		    return;
+	        }
+
+	        if (accs.length == 0) {
+		    alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
+		    return;
+	        }
+
+ 	        accounts = accs;
+	        account = accounts[0];
+
+	        updateEthNetworkInfo();
+	        updateAuctions();
+	        updateBlockNumber();
+	        watchEvents();
+	    });
+        });
     });
 }
 

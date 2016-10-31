@@ -4,13 +4,13 @@ function setStatus(message, category) {
 
     var panel = $("#statusPanel");
     panel.removeClass("panel-warning");
-    panel.removeClass("panel-error");
+    panel.removeClass("panel-danger");
     panel.removeClass("panel-success");
 
     if (category === "warning") {
 	panel.addClass("panel-warning");
     } else if (category === "error") {
-	panel.addClass("panel-error");
+	panel.addClass("panel-danger");
     } else {
 	panel.addClass("panel-success");
     }    

@@ -189,30 +189,31 @@ window.onload = function() {
     $("#header").load("header.html");
     $("#right-column").load("rightPanel.html", function() {
 	updateInfoBox(infoBoxHTMLOwnerPending);
+
+        getContractAddress(function(ah_addr, sn_addr, error) {
+	    if (error != null) {
+	        setStatus("Cannot find network. Please run an ethereum node or use Metamask.", "error");
+	        console.log(error);
+	        throw "Cannot load contract address";
+	    }
+
+	    auctionHouseContract = AuctionHouse.at(ah_addr);
+	    sampleNameContract = SampleName.at(sn_addr);
+
+	    web3.eth.getAccounts(function(err, accs) {
+
+	        accounts = accs;
+	        account = accounts[0];
+
+	        updateEthNetworkInfo();
+	        refreshAuction();
+	        updateBlockNumber();
+
+	        watchEvents();
+	    });
+        });
     });
 
-    getContractAddress(function(ah_addr, sn_addr, error) {
-	if (error != null) {
-	    setErrorMsg("Cannot find network");
-	    console.log(error);
-	    throw "Cannot load contract address";
-	}
-
-	auctionHouseContract = AuctionHouse.at(ah_addr);
-	sampleNameContract = SampleName.at(sn_addr);
-
-	web3.eth.getAccounts(function(err, accs) {
-
-	    accounts = accs;
-	    account = accounts[0];
-
-	    updateEthNetworkInfo();
-	    refreshAuction();
-	    updateBlockNumber();
-
-	    watchEvents();
-	});
-    });
 }
 
 function getParameterByName(name, url) {
