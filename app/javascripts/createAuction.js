@@ -51,7 +51,7 @@ function createAsset() {
 };
 
 function createAuction() {
-    var marketer = "0x536d6b87f21d8bbf23dd7f33fc3ca90e85cba0b6";
+    var marketer = "0x8F9def924026c13766A4B3BA9658279F1f75D8e6";
 
     setStatus("Initiating auction, please wait.", "warning");
     showSpinner();
@@ -80,7 +80,7 @@ function createAuction() {
 			 deadline,
 			 startingPrice,
 			 reservePrice,
-			 10,
+			 5,
 			 marketer,
 			 {from: account, gas:500000}).then(function(txId) {
           web3.eth.getTransactionReceipt(txId, function(error, receipt) {
