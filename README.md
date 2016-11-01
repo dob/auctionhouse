@@ -2,6 +2,18 @@
 
 This is a platform for auctioning non fungible on chain goods. The below are work in progress notes that we can update and point to as we develop the project.
 
+## Running the Dapp locally
+
+You can run the app locally using truffle. 
+
+    `git clone https://github.com/dob/auctionhouse.git`
+    `npm install -g truffle`
+    `truffle serve`
+
+You'll need to either be running a local ethereum node, or be using an Ethereum browser like Mist or Metamask. Point your Ethereum browser at the Morden TestNet.
+
+Access your locally running app at `http://localhost:8080`
+
 ## Protocol
 
 Implement an on chain set of smart contracts to govern auctions for non-fungible on chain goods. If someone wants to auction off a specific token which either doesn’t have liquidity on an exchange, or is unique, or is representative of some power or job in a network, then they can do so via the auctionhouse platform. The platform will allow the seller to:
