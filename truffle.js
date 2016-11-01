@@ -47,7 +47,7 @@ module.exports = {
     // port: 8081
     port: 8545
   },
-  networs: {
+  networks: {
     "development": {
       network_id: "default"
     },
