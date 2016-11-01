@@ -175,7 +175,7 @@ function constructAuctionView(auction) {
     }
 
     //End auction button
-    if (auction["status"] == "Active" && auction["seller"] == account && currentBlockNumber > auction["blockNumberOfDeadline"]) {
+    if (auction["status"] == "Active" && currentBlockNumber > auction["blockNumberOfDeadline"]) {
 	result += "<tr><td class='auctionLabel'>End Auction:</td><td><button id='end_button' onclick='endAuction()'>End Auction</button></td></tr>";
     }
 
