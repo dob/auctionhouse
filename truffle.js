@@ -53,7 +53,7 @@ module.exports = {
     },
     "modern": {
       network_id: 2,
-      gas: 500000
+      gas: 4612388
     },
     "live": {
       network_id: 1
