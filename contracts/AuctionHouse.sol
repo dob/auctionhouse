@@ -238,14 +238,11 @@ contract AuctionHouse {
             throw;
         }
 
-        // Return funds to the bidder
+        // Refund to the bidder
         uint bidsLength = a.bids.length;
         if (bidsLength > 0) {
             Bid topBid = a.bids[bidsLength - 1];
-            if (!topBid.bidder.send(topBid.amount)) {
-                LogFailure("Couldn't return funds to the bidder");
-                throw;
-            }
+            refunds[topBid.bidder] += topBid.amount;
 
             activeContractRecordConcat[strConcat(addrToString(a.contractAddress), a.recordId)] = false;
         }

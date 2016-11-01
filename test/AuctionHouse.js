@@ -140,8 +140,15 @@ contract("AuctionHouse", function(accounts) {
     it("should activate and cancel an auction", function() {
         var sn = SampleName.deployed();
         var owner = accounts[1];
+        var bidder = accounts[2];
         var recordId = "test3.name";
+        var bidAmount = web3.toWei(0.25, "ether");
+
         var auctionId;
+        var bidderBalanceBeforeBid;
+        var bidderBalanceAfterBid;
+        var bidderBalanceAfterCancellation;
+        var bidderBalanceAfterWithdraw;
 
         sn.addRecord(recordId, owner, recordId, owner, {from:owner}).then(function(txId) {
             return AuctionHouse.new().then(function(ah) {
@@ -150,8 +157,8 @@ contract("AuctionHouse", function(accounts) {
                                  sn.address,
                                  recordId,
                                  web3.eth.blockNumber + 100,
-                                 (2 * 10^6),
-                                 (3 * 10^6),
+                                 web3.toWei(0.2, "ether"),
+                                 web3.toWei(0.3, "ether"),
                                  5,
                                  accounts[2], {from:owner}).then(function(txId) {
                                      return ah.getAuctionsCountForUser.call(owner);
@@ -169,11 +176,22 @@ contract("AuctionHouse", function(accounts) {
                                      return ah.getStatus.call(auctionId);
                                  }).then(function(activeAuctionStatus) {
                                      assert.strictEqual(activeAuctionStatus.toNumber(), 1, "Auction should be active");
+                                     bidderBalanceBeforeBid = web3.eth.getBalance(bidder).toNumber();
+                                     return ah.placeBid(auctionId, {from:bidder, value:bidAmount, gas:500000});
+                                 }).then(function(){
+                                     bidderBalanceAfterBid = web3.eth.getBalance(bidder).toNumber();
+                                     assert.isAbove(bidderBalanceBeforeBid - bidAmount, bidderBalanceAfterBid, "Balance should be (bidAmount + gas) less now");
                                      return ah.cancelAuction(auctionId, {from:owner});
                                  }).then(function(res) {
+                                     bidderBalanceAfterCancellation = web3.eth.getBalance(bidder).toNumber();
+                                     assert.strictEqual(bidderBalanceAfterBid, bidderBalanceAfterCancellation, "Balance should be the same after cancellation, before withdraw");
                                      return ah.getStatus.call(auctionId);
                                  }).then(function(cancelledAuctionStatus) {
                                      assert.strictEqual(cancelledAuctionStatus.toNumber(), 2, "Auction should be inactive");
+                                     return ah.withdrawRefund({from:bidder});
+                                 }).then(function() {
+                                     bidderBalanceAfterWithdraw = web3.eth.getBalance(bidder).toNumber();
+                                     assert.isAbove(bidderBalanceAfterWithdraw, bidderBalanceAfterCancellation, "Balance should be more after withdraw");
                                      return sn.owner.call(recordId);
                                  }).then(function(assetOwner) {
                                      assert.strictEqual(assetOwner, owner, "Should return the asset to the seller");
