@@ -2,6 +2,7 @@ var accounts;
 var account;
 var auctions;
 var auctionHouseContract;
+// var currentBlockNumber;
 
 function updateAuctions() {
     var auctionSection = document.getElementById("userAuctions");
@@ -20,22 +21,24 @@ function updateAuctions() {
 	
 	for (var i = 0; i < count; i++) {
 	    auctionHouseContract.getAuction.call(i).then(function(auction) {
-		// Wrapping in a function because I need to access i
-		aucs.push(auction);
+            // Wrapping in a function because I need to access i
+            aucs.push(auction);
 
-		if (aucs.length == count) {
-		    for (var j = 0; j < count; j++) {
-			var auc = aucs[j];
-			res = res + "<tr>";
-			res = res + "<td><a href='auction.html?auctionId=" + j + "'>" + auc[3] + "</a></td>";
-			res = res + "<td>" + web3.fromWei(auc[10], "ether") + " ETH" + "</td>";
-			res = res + "<td>" + auc[11] + "</td>";
-			res = res + "<td>" + auc[5] + "</td>";
-			res = res + "</tr>";
-		    }
-		    auctionSection.innerHTML = res;
-		    setStatus("");
-		}
+            if (aucs.length == count) {
+                for (var j = 0; j < count; j++) {
+                    var auc = aucs[j];
+                    if (parseInt(auc[5]) > currentBlockNumber) {
+                        res = res + "<tr>";
+                        res = res + "<td><a href='auction.html?auctionId=" + j + "'>" + auc[3] + "</a></td>";
+                        res = res + "<td>" + web3.fromWei(auc[10], "ether") + " ETH" + "</td>";
+                        res = res + "<td>" + auc[11] + "</td>";
+                        res = res + "<td>" + auc[5] + "</td>";
+                        res = res + "</tr>";
+                    }
+                }
+                auctionSection.innerHTML = res;
+                setStatus("");
+            }
 	    });
 	}
     });    
@@ -61,7 +64,17 @@ window.onload = function() {
 
 	    updateEthNetworkInfo();
 	    updateAuctions();
+        updateBlockNumber();
+
 	});
     });
 }
+
+function updateBlockNumber() {
+    web3.eth.getBlockNumber(function(err, blockNumber) {
+    currentBlockNumber = blockNumber;
+    console.log("Current block number is: " + blockNumber);
+    });
+}
+
 
