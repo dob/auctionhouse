@@ -5,17 +5,23 @@ getContractAddress = function(callback) {
             ah_contract_addr = '';
             sn_contract_addr = '';
             error = "Failed to load ethereum network and smart contract";
-        } else if (result == "1" || result == "2") {
+        } else if (result == "1" || result == "2" || result == "3'") {
             if (result == "1") {
                 ah_contract_addr = '';
                 sn_contract_addr = '';
                 error("AuctionHouse is not deployed to the main net yet, please try the test net");
             }
 
-            //Testnet Setup
+            //Testnet Setup Morden
             if (result == "2") {
                 ah_contract_addr = "0x131bec75342a54ffea3087bda5ba720394c486a9";
                 sn_contract_addr = "0xfe4362ad1c80bbe89705f774af1d769a0f305605";
+            }
+
+            // New testnet Ropsten
+            if (result == "3") {
+                ah_contract_addr = "0x7e04a5b4bf7f685447dae5f042abdc6609eab93b";
+                sn_contract_addr = "0x2774443d0ba7bf870acdfeaeab3ed62b0ebd8e66";
             }
         } else {
             //For dev purposes - we use Fieldbook as a registry for our local contract address

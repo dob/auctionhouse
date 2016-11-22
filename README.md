@@ -11,7 +11,7 @@ You can run the app locally using truffle.
     npm install -g truffle     // if not already installed
     truffle serve
 
-You'll need to either be running a local ethereum node, or be using an Ethereum browser like Mist or Metamask. Point your Ethereum browser at the Morden TestNet.
+You'll need to either be running a local ethereum node, or be using an Ethereum browser like Mist or Metamask. Point your Ethereum browser at the Ropsten TestNet.
 
 Access your locally running app at `http://localhost:8080`
 
@@ -91,7 +91,7 @@ For now the contract works with `Assets` that implement the interface described 
 
 This protocol is truly decentralized, requiring no authoritative central party, so it can exist entirely on chain via transactions. This means that many different types of frontends are possible. Initially, we provide an example frontend that will connect to a locally running ethereum node by default, or any ethereum network via the Metamask plugin.
 
-The app is deployed centrally on AWS pointing at the Morden Testnet at [http://auction-house.s3-website-us-east-1.amazonaws.com/index.html].
+The app is deployed centrally on AWS pointing at the Ropsten Testnet at [http://auction-house.s3-website-us-east-1.amazonaws.com/index.html].
 
 The app is also deployed on IPFS, but that isn't reliable for upgrades at the moment since the hash will need to constantly be updated. When we go live on the mainnet, we will provide an IPFS hash to reference the reference frontend.
 

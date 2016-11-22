@@ -53,6 +53,8 @@ function updateEthNetworkInfo() {
 	    networkDisplay = "Ethereum MainNet";
 	} else if (net == 2) {
 	    networkDisplay = "Morden TestNet";
+        } else if (net == 3) {
+            networkDisplay = "Ropsten TestNet";
 	} else {
 	    networkDisplay = net;
 	}
