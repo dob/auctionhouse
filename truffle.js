@@ -51,9 +51,13 @@ module.exports = {
     "development": {
       network_id: "default"
     },
-    "modern": {
+    "morden": {
       network_id: 2,
       gas: 4612388
+    },
+    "ropsten": {
+      network_id: 3,
+      gas: 4000000
     },
     "live": {
       network_id: 1

@@ -1,4 +1,4 @@
-var accounts;
+var accounts; 
 var account;
 var auctions;
 var auctionHouseContract;

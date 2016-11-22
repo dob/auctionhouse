@@ -20,8 +20,8 @@ getContractAddress = function(callback) {
 
             // New testnet Ropsten
             if (result == "3") {
-                ah_contract_addr = "0x7e04a5b4bf7f685447dae5f042abdc6609eab93b";
-                sn_contract_addr = "0x2774443d0ba7bf870acdfeaeab3ed62b0ebd8e66";
+                ah_contract_addr = "0x7ac337474ca82e0f324fbbe8493f175e0f681188";
+                sn_contract_addr = "0xd1555741b88895a38cd456842188df2cd112b4ba";
             }
         } else {
             //For dev purposes - we use Fieldbook as a registry for our local contract address
