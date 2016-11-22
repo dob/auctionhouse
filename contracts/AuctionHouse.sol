@@ -309,9 +309,15 @@ contract AuctionHouse {
         Auction a = auctions[auctionId];
         activeContractRecordConcat[strConcat(addrToString(a.contractAddress), a.recordId)] = false;
 
+        // Make sure auction hasn't already been ended
+        if (a.status != AuctionStatus.Active) {
+            LogFailure("Can not end an auction that's already ended");
+            throw;
+        }
+        
         if (block.number < a.blockNumberOfDeadline) {
             LogFailure("Can not end an auction that hasn't hit the deadline yet");
-            return false;
+            throw; 
         }
 
         Asset asset = Asset(a.contractAddress);
