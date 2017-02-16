@@ -9,6 +9,7 @@ You can run the app locally using truffle.
     git clone https://github.com/dob/auctionhouse.git
     cd auctionhouse
     npm install -g truffle     // if not already installed
+    npm install truffle-default-builder --save
     truffle serve
 
 You'll need to either be running a local ethereum node, or be using an Ethereum browser like Mist or Metamask. Point your Ethereum browser at the Ropsten TestNet.
