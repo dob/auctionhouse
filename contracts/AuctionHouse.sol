@@ -5,7 +5,7 @@ pragma solidity ^0.4.2;
 // for an item that conforms to the Asset interface described in
 // Asset.sol
 
-import "Asset.sol";
+import "./Asset.sol";
 
 contract AuctionHouse {
 

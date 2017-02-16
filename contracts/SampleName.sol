@@ -3,7 +3,7 @@ pragma solidity ^0.4.2;
 // Sample implementation of a non fungible asset, which is a name resolved to
 // an ethereum wallet address
 
-import "Asset.sol";
+import "./Asset.sol";
 
 contract SampleName is Asset {
     struct Record {
